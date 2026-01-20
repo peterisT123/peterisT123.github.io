@@ -53,7 +53,14 @@ function Calendar({
         day_hidden: "invisible",
         ...classNames,
       }}
-      // Removed unsupported IconLeft and IconRight from components prop
+      components={{
+        IconLeft: ({ className, ...props }) => (
+          <ChevronLeft className={cn("h-4 w-4", className)} {...props} />
+        ),
+        IconRight: ({ className, ...props }) => (
+          <ChevronRight className={cn("h-4 w-4", className)} {...props} />
+        ),
+      }}
       {...props}
     />
   )

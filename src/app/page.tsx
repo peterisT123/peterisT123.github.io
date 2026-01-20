@@ -6,53 +6,12 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Stepper } from '@/components/stepper';
 import { Button } from '@/components/ui/button';
 import { useAppContext } from '@/context/app-context';
-import type { AppState } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 
 import { IntroStep } from '@/components/steps/intro-step';
 import { PropertyDetailsStep } from '@/components/steps/property-details-step';
 import { SummaryStep } from '@/components/steps/summary-step';
 import { ContactStep } from '@/components/steps/contact-step';
-
-function formatDataForEmail(data: AppState): string {
-  let emailBody = `Jauns apdrošināšanas pieteikums\n`;
-  emailBody += `=================================\n\n`;
-  
-  emailBody += `KLIENTA INFORMĀCIJA\n`;
-  emailBody += `-------------------\n`;
-  emailBody += `Personas statuss: ${data.legalStatus}\n`;
-  emailBody += `Vārds, uzvārds: ${data.contact.name}\n`;
-  emailBody += `E-pasts: ${data.contact.email}\n`;
-  emailBody += `Tālrunis: ${data.contact.phone}\n\n`;
-
-  emailBody += `APDROŠINĀMIE OBJEKTI\n`;
-  emailBody += `---------------------\n`;
-
-  data.buildings.forEach((building, index) => {
-    emailBody += `\nNr.${index + 1} - ${building.objectType}\n`;
-    emailBody += `Īpašnieka vārds: ${building.ownerName}\n`;
-    emailBody += `Platība: ${building.propertyArea} m²\n`;
-    emailBody += `Būvniecības gads: ${building.buildYear}\n`;
-
-    if (building.objectType === 'Dzīvoklis') {
-      emailBody += `Stāvs: ${building.currentFloor} no ${building.totalFloors}\n`;
-    }
-    if (building.objectType === 'Māja') {
-        emailBody += `Stāvu skaits: ${building.totalFloors}\n`;
-    }
-
-    emailBody += `Statuss: ${building.isConstantlyInhabited ? 'Pastāvīgi apdzīvots' : 'Nav pastāvīgi apdzīvots'}\n`;
-    emailBody += `Zaudējumi pēdējos 3 gados: ${building.lossesInLast3Years ? 'Ir bijuši' : 'Nav bijuši'}\n`;
-    emailBody += `Kustamā manta: ${building.movablePropertyIncluded ? 'Iekļauta' : 'Nav iekļauta'}\n`;
-    if (building.movablePropertyIncluded) {
-      emailBody += `   - Vērtīga manta: ${building.valuableMovablePropertyIncluded ? 'Iekļauta' : 'Nav iekļauta'}\n`;
-    }
-  });
-
-  emailBody += `\n\n--- E-pasta beigas ---\n`;
-
-  return emailBody;
-}
 
 const steps = [
   {
@@ -88,19 +47,40 @@ export default function InsuranceWizard() {
 
   const currentStepData = steps.find((s) => s.id === step);
 
-  const handleSend = () => {
-    const emailBody = formatDataForEmail(state);
-    const mailtoLink = `mailto:brokeris@example.com?subject=${encodeURIComponent('Jauns apdrošināšanas pieteikums')}&body=${encodeURIComponent(emailBody)}`;
-    
-    toast({
-      title: "Pieteikums sagatavots!",
-      description: "Jūsu e-pasta klients tiks atvērts, lai nosūtītu pieteikumu.",
-      variant: 'default',
-      className: 'bg-primary text-primary-foreground border-primary'
-    });
+  const handleSend = async () => {
+    try {
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(state),
+      });
 
-    setSubmitted(true);
-    window.location.href = mailtoLink;
+      if (!response.ok) {
+        throw new Error(`Server error! Status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Server response:', result);
+
+      toast({
+        title: "Pieteikums nosūtīts!",
+        description: "Jūsu pieteikums ir veiksmīgi nosūtīts mūsu brokerim.",
+        variant: 'default',
+        className: 'bg-primary text-primary-foreground border-primary'
+      });
+
+      setSubmitted(true);
+
+    } catch (error) {
+      console.error('Failed to send data:', error);
+      toast({
+        title: "Kļūda!",
+        description: "Notikusi kļūda, sūtot pieteikumu. Lūdzu, mēģiniet vēlāk.",
+        variant: 'destructive',
+      });
+    }
   };
 
   return (

@@ -1,7 +1,7 @@
 
 import {NextResponse} from 'next/server';
 import nodemailer from 'nodemailer';
-import {type State} from '@/lib/types';
+import {type AppState} from '@/lib/types';
 
 // Helper function to generate HTML for a summary item
 const summaryItem = (label: string, value: string | number | undefined) => {
@@ -26,7 +26,7 @@ const booleanSummaryItem = (label: string, value: boolean) => {
   `;
 };
 
-const generateHtml = (state: State) => {
+const generateHtml = (state: AppState) => {
     return `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 10px; padding: 20px;">
             <h1 style="color: #333; text-align: center;">Jauns apdrošināšanas pieteikums</h1>
@@ -77,7 +77,7 @@ const generateHtml = (state: State) => {
 
 
 export async function POST(req: Request) {
-  const state: State = await req.json();
+  const state: AppState = await req.json();
   const GMAIL_USER = process.env.GMAIL_USER;
   const GMAIL_PASS = process.env.GMAIL_PASS;
   const BROKER_EMAIL = process.env.BROKER_EMAIL;

@@ -10,9 +10,9 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "export": "next export -o docs",
+    "export": "next export",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d out"
+    "deploy": "gh-pages -d docs"
   },
   "dependencies": {
     "@genkit-ai/google-genai": "^1.20.0",

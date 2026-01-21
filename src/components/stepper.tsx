@@ -37,7 +37,7 @@ export function Stepper({ currentStep, steps }: StepperProps) {
               )}
 
               <motion.div
-                className="relative flex h-10 w-10 items-center justify-center rounded-full"
+                className="relative flex h-10 w-10 items-center justify-center rounded-full bg-card"
                 animate={currentStep > stepIdx ? 'completed' : currentStep === stepIdx + 1 ? 'active' : 'inactive'}
                 variants={{
                     completed: { scale: 1, backgroundColor: 'hsl(var(--primary))' },

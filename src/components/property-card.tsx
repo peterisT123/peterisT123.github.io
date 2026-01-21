@@ -479,12 +479,10 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                                     defaultValue={field.value}
                                     className="flex flex-col md:flex-row gap-4"
                                     >
-                                    {objectType === 'Dzīvoklis' && (
-                                        <FormItem className="flex items-center space-x-3 space-y-0">
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
                                         <FormControl><RadioGroupItem value="Tikai dzīvoklī" /></FormControl>
                                         <FormLabel className="font-normal">Tikai dzīvoklī</FormLabel>
-                                        </FormItem>
-                                    )}
+                                    </FormItem>
                                     <FormItem className="flex items-center space-x-3 space-y-0">
                                         <FormControl><RadioGroupItem value="Visā Latvijā" /></FormControl>
                                         <FormLabel className="font-normal">Visā Latvijā</FormLabel>

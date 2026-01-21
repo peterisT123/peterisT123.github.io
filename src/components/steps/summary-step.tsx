@@ -37,7 +37,7 @@ export function SummaryStep() {
             <CardHeader className="text-center">
                 <MailCheck className="mx-auto h-16 w-16 text-primary" />
                 <CardTitle className="text-3xl font-headline">Paldies!</CardTitle>
-                <CardDescription className='text-base'>Pieteikums sagatavots nosūtīšanai. Lūdzu, pabeidziet sūtīšanu savā e-pasta programmā.</CardDescription>
+                <CardDescription className='text-base'>Forma nosūtīta!!!!</CardDescription>
             </CardHeader>
         </Card>
     );
@@ -47,7 +47,7 @@ export function SummaryStep() {
     <Card className="max-w-3xl mx-auto rounded-3xl shadow-lg">
       <CardHeader className="text-center">
         <CardTitle className="text-3xl font-headline">Pieteikuma kopsavilkums</CardTitle>
-        <CardDescription>Lūdzu, pārbaudiet ievadīto informāciju pirms nosūtīšanas.</CardDescription>
+        <CardDescription>Solis 3 no 4. Lūdzu, pārbaudiet ievadīto informāciju pirms nosūtīšanas.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
         <div>

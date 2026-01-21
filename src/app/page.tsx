@@ -28,15 +28,15 @@ const steps = [
   },
   {
     id: 3,
-    title: 'Kontakti',
-    icon: Mail,
-    component: <ContactStep />,
+    title: 'Kopsavilkums',
+    icon: Check,
+    component: <SummaryStep />,
   },
   {
     id: 4,
-    title: 'Apstiprinājums',
-    icon: Check,
-    component: <SummaryStep />,
+    title: 'Kontakti',
+    icon: Mail,
+    component: <ContactStep />,
   },
 ];
 

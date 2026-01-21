@@ -29,8 +29,8 @@ export function ContactStep() {
   return (
     <Card className="max-w-2xl mx-auto rounded-3xl shadow-lg">
       <CardHeader>
-        <CardTitle className="text-3xl font-headline">Gandrīz pabeigts!</CardTitle>
-        <CardDescription>Lūdzu, ievadiet savu kontaktinformāciju, lai mēs varētu sagatavot Jums piedāvājumu.</CardDescription>
+        <CardTitle className="text-3xl font-headline">Kontakti</CardTitle>
+        <CardDescription>Solis 4 no 4. Lūdzu, ievadiet savu kontaktinformāciju, lai mēs varētu sagatavot Jums piedāvājumu.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>

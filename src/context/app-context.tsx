@@ -5,16 +5,29 @@ import type { AppState, AppContextType, Building } from '@/lib/types';
 
 const defaultBuilding: Building = {
   id: 'building-0',
-  objectType: 'Dzīvoklis',
+  objectType: 'Ēka',
   ownerName: '',
   propertyArea: undefined,
-  buildYear: 'Pēc 2000',
+  commissioningYear: 'Pēc 2000',
+  constructionMaterial: 'Mūris',
+  lastRenovationYear: undefined,
+  finishingLevel: 'Kvalitatīvs',
   isConstantlyInhabited: true,
+  isRented: false,
+  hasSecurityAlarm: false,
   lossesInLast3Years: false,
   movablePropertyIncluded: false,
   valuableMovablePropertyIncluded: false,
+  hasSolarPanels: false,
+  solarPanelsCount: undefined,
+  solarPanelsValue: undefined,
+  solarPanelsLocation: undefined,
   totalFloors: undefined,
   currentFloor: undefined,
+  isCommercial: false,
+  commercialActivityType: undefined,
+  civilLiabilityInsuranceIncluded: false,
+  civilLiabilityCoverage: undefined,
 };
 
 const initialState: AppState = {

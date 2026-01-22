@@ -74,6 +74,9 @@ export function SummaryStep() {
                   <SummaryItem label="Īpašnieks" value={building.ownerName} />
                   <SummaryItem label="Platība" value={`${building.propertyArea} m²`} />
                   <SummaryItem label="Nodošanas ekspluatācijā gads" value={building.commissioningYear} />
+                  <SummaryItem label="Būvniecības materiāls" value={building.constructionMaterial} />
+                  <SummaryItem label="Kapitālā remonta gads" value={building.lastRenovationYear} />
+                  <SummaryItem label="Apdailes līmenis" value={building.finishingLevel} />
                   {building.objectType === 'Dzīvoklis' && (
                     <>
                       <SummaryItem label="Stāvs" value={building.currentFloor} />
@@ -84,11 +87,33 @@ export function SummaryStep() {
                     <SummaryItem label="Stāvu skaits" value={building.totalFloors} />
                   )}
                   <BooleanSummaryItem label="Pastāvīgi apdzīvots" value={building.isConstantlyInhabited} />
+                  <BooleanSummaryItem label="Tiek izīrēts" value={building.isRented} />
+                  <BooleanSummaryItem label="Signalizācija" value={building.hasSecurityAlarm} />
                   <BooleanSummaryItem label="Zaudējumi pēdējos 3 gados" value={building.lossesInLast3Years} />
                   <BooleanSummaryItem label="Kustamā manta" value={building.movablePropertyIncluded} />
                   {building.movablePropertyIncluded && (
                     <div className='pl-4'>
                         <BooleanSummaryItem label="Vērtīga kustamā manta" value={building.valuableMovablePropertyIncluded} />
+                    </div>
+                  )}
+                  <BooleanSummaryItem label="Saules paneļi" value={building.hasSolarPanels} />
+                  {building.hasSolarPanels && (
+                    <div className='pl-4'>
+                        <SummaryItem label="Saules paneļu skaits" value={building.solarPanelsCount} />
+                        <SummaryItem label="Saules paneļu vērtība" value={`${building.solarPanelsValue} €`} />
+                        <SummaryItem label="Saules paneļu atrašanās vieta" value={building.solarPanelsLocation} />
+                    </div>
+                  )}
+                  <BooleanSummaryItem label="Apdrošināts komercdarbībai" value={building.isCommercial} />
+                  {building.isCommercial && (
+                     <div className='pl-4'>
+                        <SummaryItem label="Komercdarbības veids" value={building.commercialActivityType} />
+                    </div>
+                  )}
+                  <BooleanSummaryItem label="Civiltiesiskā apdrošināšana" value={building.civilLiabilityInsuranceIncluded} />
+                  {building.civilLiabilityInsuranceIncluded && (
+                     <div className='pl-4'>
+                        <SummaryItem label="Civiltiesiskās atbildības segums" value={building.civilLiabilityCoverage} />
                     </div>
                   )}
                 </CardContent>

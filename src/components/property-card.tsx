@@ -131,7 +131,7 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                     render={({ field }) => (
                         <FormItem>
                         <FormLabel>Kapitālā remonta gads</FormLabel>
-                        <FormControl><Input type="number" placeholder="2022" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || undefined)} /></FormControl>
+                        <FormControl><Input type="number" placeholder="2022" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))}/></FormControl>
                         <FormMessage />
                         </FormItem>
                     )}
@@ -169,7 +169,7 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                     render={({ field }) => (
                         <FormItem>
                         <FormLabel>Īpašuma platība (m²)</FormLabel>
-                        <FormControl><Input type="number" placeholder="65.5" {...field} onChange={e => field.onChange(parseFloat(e.target.value) || undefined)} /></FormControl>
+                        <FormControl><Input type="number" placeholder="65.5" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseFloat(e.target.value))} /></FormControl>
                         <FormMessage />
                         </FormItem>
                     )}
@@ -182,7 +182,7 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                         render={({ field }) => (
                             <FormItem>
                             <FormLabel>Stāvs</FormLabel>
-                            <FormControl><Input type="number" placeholder="3" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || undefined)} /></FormControl>
+                            <FormControl><Input type="number" placeholder="3" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))}/></FormControl>
                             <FormMessage />
                             </FormItem>
                         )}
@@ -193,7 +193,7 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                         render={({ field }) => (
                             <FormItem>
                             <FormLabel>Kopējais stāvu skaits ēkā</FormLabel>
-                            <FormControl><Input type="number" placeholder="5" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || undefined)}/></FormControl>
+                            <FormControl><Input type="number" placeholder="5" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))}/></FormControl>
                             <FormMessage />
                             </FormItem>
                         )}
@@ -208,7 +208,7 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                         render={({ field }) => (
                             <FormItem>
                             <FormLabel>Stāvs</FormLabel>
-                            <FormControl><Input type="number" placeholder="3" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || undefined)} /></FormControl>
+                            <FormControl><Input type="number" placeholder="3" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))}/></FormControl>
                             <FormMessage />
                             </FormItem>
                         )}
@@ -219,7 +219,7 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                         render={({ field }) => (
                             <FormItem>
                             <FormLabel>Kopējais stāvu skaits ēkā</FormLabel>
-                            <FormControl><Input type="number" placeholder="5" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || undefined)}/></FormControl>
+                            <FormControl><Input type="number" placeholder="5" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))}/></FormControl>
                             <FormMessage />
                             </FormItem>
                         )}
@@ -374,7 +374,7 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Skaits</FormLabel>
-                                <FormControl><Input type="number" placeholder="12" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || undefined)} /></FormControl>
+                                <FormControl><Input type="number" placeholder="12" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))}/></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -385,7 +385,7 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Vērtība (EUR)</FormLabel>
-                                <FormControl><Input type="number" placeholder="5000" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || undefined)} /></FormControl>
+                                <FormControl><Input type="number" placeholder="5000" {...field} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))}/></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}

@@ -46,12 +46,12 @@ const generateHtml = (state: AppState) => {
                     <table style="width: 100%; border-collapse: collapse;">
                         ${summaryItem('Īpašnieks', building.ownerName)}
                         ${summaryItem('Platība', `${building.propertyArea} m²`)}
-                        ${summaryItem('Būvniecības gads', building.buildYear)}
+                        ${summaryItem('Nodošanas ekspluatācijā gads', building.commissioningYear)}
                         ${building.objectType === 'Dzīvoklis' ? `
                             ${summaryItem('Stāvs', building.currentFloor)}
                             ${summaryItem('Kopējais stāvu skaits', building.totalFloors)}
                         ` : ''}
-                        ${building.objectType === 'Māja' ? `
+                        ${building.objectType === 'Ēka' ? `
                             ${summaryItem('Stāvu skaits', building.totalFloors)}
                         ` : ''}
                         ${booleanSummaryItem('Pastāvīgi apdzīvots', building.isConstantlyInhabited)}

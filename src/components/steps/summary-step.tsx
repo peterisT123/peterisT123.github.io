@@ -73,14 +73,14 @@ export function SummaryStep() {
                 <CardContent className="p-4 divide-y">
                   <SummaryItem label="Īpašnieks" value={building.ownerName} />
                   <SummaryItem label="Platība" value={`${building.propertyArea} m²`} />
-                  <SummaryItem label="Būvniecības gads" value={building.buildYear} />
+                  <SummaryItem label="Nodošanas ekspluatācijā gads" value={building.commissioningYear} />
                   {building.objectType === 'Dzīvoklis' && (
                     <>
                       <SummaryItem label="Stāvs" value={building.currentFloor} />
                       <SummaryItem label="Kopējais stāvu skaits" value={building.totalFloors} />
                     </>
                   )}
-                   {building.objectType === 'Māja' && (
+                   {building.objectType === 'Ēka' && (
                     <SummaryItem label="Stāvu skaits" value={building.totalFloors} />
                   )}
                   <BooleanSummaryItem label="Pastāvīgi apdzīvots" value={building.isConstantlyInhabited} />

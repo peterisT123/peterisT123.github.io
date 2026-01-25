@@ -1,0 +1,5 @@
+# GitHub Pages Configuration
+
+This file tells GitHub Pages to use the root directory for deployment. If you want to use a different folder (like /docs), change the path below.
+
+/

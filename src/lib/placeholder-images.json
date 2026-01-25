@@ -1,0 +1,10 @@
+{
+  "placeholderImages": [
+    {
+      "id": "hero-insurance",
+      "description": "A modern house with an insurance shield icon.",
+      "imageUrl": "https://images.unsplash.com/photo-1732717566587-f5a155bd8dea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxob3VzZSUyMGluc3VyYW5jZXxlbnwwfHx8fDE3Njg3NDkyNDh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "house insurance"
+    }
+  ]
+}

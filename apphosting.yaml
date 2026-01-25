@@ -1,0 +1,27 @@
+# Settings to manage and configure a Firebase App Hosting backend.
+# https://firebase.google.com/docs/app-hosting/configure
+
+runConfig:
+  # Increase this value if you'd like to automatically spin up
+  # more instances in response to increased traffic.
+  maxInstances: 10
+  # Secret environment variables, prefixed with 'SECRET_'.
+  # Pass these to your app as environment variables.
+  secretEnv:
+    - secret: GMAIL_USER
+      env: GMAIL_USER
+    - secret: GMAIL_APP_PASSWORD
+      env: GMAIL_APP_PASSWORD
+
+# In order for your App Hosting backend to be able to access secrets from
+# Secret Manager, you must grant the App Hosting service account the
+# "Secret Manager Secret Accessor" role.
+#
+# The service account is:
+# firebase-app-hosting-run-sa@<PROJECT_ID>.iam.gserviceaccount.com
+#
+# You can do this in the Google Cloud console:
+# https://console.cloud.google.com/iam-admin/iam
+#
+# Or with the gcloud CLI:
+# gcloud projects add-iam-policy-binding <PROJECT_ID> --member='serviceAccount:firebase-app-hosting-run-sa@<PROJECT_ID>.iam.gserviceaccount.com' --role='roles/secretmanager.secretAccessor'

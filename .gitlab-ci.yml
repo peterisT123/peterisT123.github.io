@@ -1,0 +1,33 @@
+image: node:20
+
+stages:
+  - build
+  - deploy
+
+cache:
+  paths:
+    - node_modules/
+
+before_script:
+  - npm ci
+
+build:
+  stage: build
+  script:
+    - npm run build
+    - mv out public
+  artifacts:
+    paths:
+      - public
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Deployed to GitLab Pages."
+  dependencies:
+    - build
+  artifacts:
+    paths:
+      - public
+  only:
+    - main

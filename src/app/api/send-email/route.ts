@@ -86,8 +86,8 @@ export async function POST(req: NextRequest) {
 
     // Create a new document in the 'mail' collection
     await db.collection('mail').add({
-      to: [contact.email],
-      bcc: ['intasapdrosin@my.domainp.com', 'peteris.troksa@inbox.lv'],
+      to: ['peteris.troksa@inbox.lv'],
+      cc: ['inta.troksa@inbox.lv'],
       message: {
         subject: `Jauns apdrošināšanas pieteikums no ${contact.name}`,
         html: htmlBody,

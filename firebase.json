@@ -8,6 +8,13 @@
     ],
     "frameworksBackend": {
       "region": "us-central1"
-    }
+    },
+    "redirects": [
+      {
+        "source": "/:path*",
+        "destination": "https://intasaptauja.app/:path*",
+        "type": 301
+      }
+    ]
   }
 }

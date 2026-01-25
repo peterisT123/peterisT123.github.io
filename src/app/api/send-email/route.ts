@@ -1,10 +1,16 @@
 
 import { NextRequest, NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
+import * as admin from 'firebase-admin';
 
-// Funkcijas e-pasta HTML ķermeņa izveidei (līdzīgas kā iepriekš)
-const formatBoolean = (value: boolean) => (value ? 'Jā' : 'Nē');
-const formatValue = (value: string | number | undefined, defaultValue: string = 'Nav norādīts') => value ?? defaultValue;
+// Initialize Firebase Admin SDK (if not already initialized)
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.applicationDefault(),
+    databaseURL: `https://${process.env.GCLOUD_PROJECT}.firebaseio.com`
+  });
+}
+
+const db = admin.firestore();
 
 const createHtmlBody = (state: any): string => {
     const { legalStatus, contact, buildings } = state;
@@ -69,7 +75,8 @@ const createHtmlBody = (state: any): string => {
 
     return html;
 }
-
+const formatBoolean = (value: boolean) => (value ? 'Jā' : 'Nē');
+const formatValue = (value: string | number | undefined, defaultValue: string = 'Nav norādīts') => value ?? defaultValue;
 
 export async function POST(req: NextRequest) {
   try {
@@ -77,26 +84,15 @@ export async function POST(req: NextRequest) {
     const { contact } = state;
     const htmlBody = createHtmlBody(state);
 
-    // Nodemailer transportera konfigurācija
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD, // Svarīgi: Izmantot App Password
+    // Create a new document in the 'mail' collection
+    await db.collection('mail').add({
+      to: [contact.email],
+      bcc: ['intasapdrosin@my.domainp.com', 'peteris.troksa@inbox.lv'],
+      message: {
+        subject: `Jauns apdrošināšanas pieteikums no ${contact.name}`,
+        html: htmlBody,
       },
     });
-
-    // E-pasta opcijas
-    const mailOptions = {
-      from: process.env.GMAIL_USER, // Jūsu Gmail adrese
-      to: 'belziens@inbox.lv', // Brokera e-pasta adrese
-      subject: `Jauns apdrošināšanas pieteikums no ${contact.name}`,
-      replyTo: contact.email,
-      html: htmlBody,
-    };
-
-    // Sūta e-pastu
-    await transporter.sendMail(mailOptions);
 
     return NextResponse.json({ message: 'Pieteikums nosūtīts!' }, { status: 200 });
 

@@ -3,16 +3,23 @@ import { useAppContext } from '@/context/app-context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { CheckCircle2, XCircle, MailCheck } from 'lucide-react';
+import { format } from 'date-fns';
 
 export function SummaryStep() {
   const { state } = useAppContext();
 
-  const SummaryItem = ({ label, value }: { label: string; value: string | number | undefined }) => {
+  const SummaryItem = ({ label, value }: { label: string; value: string | number | undefined | Date }) => {
     if (value === undefined || value === null || value === '') return null;
+    
+    let displayValue = value;
+    if (value instanceof Date) {
+      displayValue = format(value, 'dd.MM.yyyy');
+    }
+
     return (
         <div className="flex justify-between items-center py-2">
             <p className="text-muted-foreground">{label}</p>
-            <p className="font-semibold text-foreground text-right">{value}</p>
+            <p className="font-semibold text-foreground text-right">{displayValue}</p>
         </div>
     );
   };
@@ -41,6 +48,43 @@ export function SummaryStep() {
             </CardHeader>
         </Card>
     );
+  }
+
+  if (state.product === 'Ceļojums') {
+    return (
+      <Card className="max-w-3xl mx-auto rounded-3xl shadow-lg">
+        <CardHeader className="text-center">
+          <CardTitle className="text-3xl font-headline">Pieteikuma kopsavilkums</CardTitle>
+          <CardDescription>Solis 2 no 3. Lūdzu, pārbaudiet ievadīto informāciju pirms nosūtīšanas.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-8">
+          <div>
+            <h3 className="text-lg font-semibold font-headline mb-2 text-primary">Ceļojuma informācija</h3>
+            <Card className='rounded-2xl'>
+              <CardContent className='p-4 divide-y'>
+                <SummaryItem label="Ceļojuma sākuma datums" value={state.travel.travelTime.from} />
+                <SummaryItem label="Ceļojuma beigu datums" value={state.travel.travelTime.to} />
+                <BooleanSummaryItem label="Vairākkārtēji braucieni gada laikā" value={state.travel.multipleTrips} />
+                <SummaryItem label="Ceļotāju skaits (līdz 64 gadiem)" value={state.travel.travelers.upTo64} />
+                <SummaryItem label="Ceļotāju skaits (65-74 gadi)" value={state.travel.travelers.from65to74} />
+                <SummaryItem label="Ceļotāju skaits (75+ gadi)" value={state.travel.travelers.from75} />
+                <SummaryItem label="Aktivitātes" value={state.travel.activities} />
+              </CardContent>
+            </Card>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold font-headline mb-2 text-primary">Kontaktinformācija</h3>
+            <Card className='rounded-2xl'>
+              <CardContent className='p-4 divide-y'>
+                <SummaryItem label="Vārds, uzvārds" value={state.contact.name} />
+                <SummaryItem label="E-pasts" value={state.contact.email} />
+                <SummaryItem label="Tālrunis" value={state.contact.phone} />
+              </CardContent>
+            </Card>
+          </div>
+        </CardContent>
+      </Card>
+    )
   }
 
   return (

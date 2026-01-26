@@ -3,6 +3,14 @@ import { z } from 'zod';
 const requiredError = { required_error: 'Šis lauks ir obligāts.' };
 const invalidTypeError = { invalid_type_error: 'Ievadīta nekorekta vērtība.' };
 
+export const ContactSchema = z.object({
+  name: z.string(requiredError).min(2, 'Vārdam jābūt vismaz 2 burtus garam.').max(120, 'Vārds nevar būt garāks par 120 burtiem.'),
+  email: z.string(requiredError).email('Lūdzu, ievadiet korektu e-pasta adresi.'),
+  phone: z.string(requiredError).min(8, 'Telefona numuram jābūt vismaz 8 ciparus garam.'),
+  company: z.string().optional(),
+});
+
+
 export const BuildingSchema = z.object({
     id: z.string(),
     objectType: z.enum(['Ēka', 'Dzīvoklis', 'Palīgēka'], requiredError),
@@ -17,7 +25,9 @@ export const BuildingSchema = z.object({
     hasSecurityAlarm: z.boolean(),
     lossesInLast3Years: z.boolean(),
     movablePropertyIncluded: z.boolean(),
+    totalMovablePropertyValue: z.number(invalidTypeError).positive('Vērtībai jābūt pozitīvam skaitlim.').optional(),
     valuableMovablePropertyIncluded: z.boolean(),
+    movablePropertyValue: z.number(invalidTypeError).positive('Vērtībai jābūt pozitīvam skaitlim.').optional(),
     hasSolarPanels: z.boolean(),
     solarPanelsCount: z.number(invalidTypeError).positive('Paneļu skaitam jābūt pozitīvam skaitlim.').optional(),
     solarPanelsValue: z.number(invalidTypeError).positive('Vērtībai jābūt pozitīvam skaitlim.').optional(),
@@ -28,66 +38,36 @@ export const BuildingSchema = z.object({
     commercialActivityType: z.string().max(200, 'Apraksts nevar būt garāks par 200 simboliem.').optional(),
     civilLiabilityInsuranceIncluded: z.boolean(),
     civilLiabilityCoverage: z.enum(['Tikai dzīvoklī', 'Visā Latvijā', 'Visā pasaulē']).optional(),
+    civilLiabilityValue: z.enum(['5000', '10000', '15000', '20000 un vairāk']).optional(),
 }).superRefine((data, ctx) => {
     if (data.objectType === 'Dzīvoklis') {
         if (!data.currentFloor) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
-                message: 'Stāvs ir obligāts lauks.',
+                message: 'Lūdzu, norādiet stāvu, kurā atrodas dzīvoklis.',
                 path: ['currentFloor'],
             });
         }
         if (!data.totalFloors) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
-                message: 'Kopējais stāvu skaits ir obligāts.',
-                path: ['totalFloors'],
-            });
-        }
-        if (data.currentFloor && data.totalFloors && data.currentFloor > data.totalFloors) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: 'Stāvs nevar būt lielāks par kopējo stāvu skaitu.',
-                path: ['currentFloor'],
-            });
-        }
-    }
-    if (data.objectType === 'Ēka') {
-        if (!data.totalFloors) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: 'Stāvu skaits ir obligāts.',
+                message: 'Lūdzu, norādiet kopējo stāvu skaitu ēkā.',
                 path: ['totalFloors'],
             });
         }
     }
-    if (data.hasSolarPanels) {
-        if (!data.solarPanelsCount) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: 'Saules paneļu skaits ir obligāts.',
-                path: ['solarPanelsCount'],
-            });
-        }
-        if (!data.solarPanelsValue) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: 'Saules paneļu vērtība ir obligāta.',
-                path: ['solarPanelsValue'],
-            });
-        }
-        if (!data.solarPanelsLocation) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: 'Atrašanās vieta ir obligāta.',
-                path: ['solarPanelsLocation'],
-            });
-        }
+    if (data.objectType === 'Ēka' && !data.totalFloors) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Lūdzu, norādiet ēkas stāvu skaitu.',
+            path: ['totalFloors'],
+        });
     }
+
     if (data.isCommercial && !data.commercialActivityType) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: 'Uzņēmējdarbības veids ir obligāts lauks.',
+            message: 'Lūdzu, aprakstiet saimnieciskās darbības veidu.',
             path: ['commercialActivityType'],
         });
     }
@@ -98,14 +78,18 @@ export const BuildingSchema = z.object({
             path: ['civilLiabilityCoverage'],
         });
     }
-});
-
-
-export const ContactSchema = z.object({
-    name: z.string().min(2, { message: "Vārdam jābūt vismaz 2 burtus garam." }),
-    email: z.string().email({ message: "Lūdzu, ievadiet derīgu e-pasta adresi." }),
-    phone: z.string().min(8, { message: "Tālruņa numuram jābūt vismaz 8 ciparus garam." }),
-    consent: z.boolean().refine(val => val === true, {
-        message: 'Lai turpinātu, jums jāpiekrīt informācijas nodošanai speciālistam.',
-    }),
+    if (data.movablePropertyIncluded && !data.totalMovablePropertyValue) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Lūdzu, ievadiet mantas kopējo vērtību.',
+            path: ['totalMovablePropertyValue'],
+        });
+    }
+    if (data.civilLiabilityInsuranceIncluded && !data.civilLiabilityValue) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Lūdzu, izvēlieties civiltiesiskās atbildības vērtību.',
+            path: ['civilLiabilityValue'],
+        });
+    }
 });

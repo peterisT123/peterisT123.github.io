@@ -17,16 +17,17 @@ export function ContactStep() {
   const form = useForm<z.infer<typeof ContactSchema>>({
     resolver: zodResolver(ContactSchema),
     defaultValues: state.contact,
+    mode: 'onChange', // Validate on change
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+  // Function to update the global state
+  const updateGlobalState = (field: keyof typeof state.contact, value: any) => {
     setState(prevState => ({
-        ...prevState,
-        contact: {
-            ...prevState.contact,
-            [name]: type === 'checkbox' ? checked : value
-        }
+      ...prevState,
+      contact: {
+        ...prevState.contact,
+        [field]: value,
+      },
     }));
   };
 
@@ -46,7 +47,7 @@ export function ContactStep() {
                 <FormItem>
                   <FormLabel>Vārds, uzvārds</FormLabel>
                   <FormControl>
-                    <Input {...field} onChange={(e) => { field.onChange(e); handleInputChange(e); }} />
+                    <Input {...field} onChange={(e) => { field.onChange(e); updateGlobalState('name', e.target.value); }} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -59,7 +60,7 @@ export function ContactStep() {
                 <FormItem>
                   <FormLabel>E-pasts</FormLabel>
                   <FormControl>
-                    <Input type="email" {...field} onChange={(e) => { field.onChange(e); handleInputChange(e); }} />
+                    <Input type="email" {...field} onChange={(e) => { field.onChange(e); updateGlobalState('email', e.target.value); }} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -72,7 +73,7 @@ export function ContactStep() {
                 <FormItem>
                   <FormLabel>Tālrunis</FormLabel>
                   <FormControl>
-                    <Input {...field} onChange={(e) => { field.onChange(e); handleInputChange(e); }} />
+                    <Input {...field} onChange={(e) => { field.onChange(e); updateGlobalState('phone', e.target.value); }} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -84,12 +85,13 @@ export function ContactStep() {
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
                   <FormControl>
-                    <Checkbox checked={field.value} onCheckedChange={(checked) => { field.onChange(checked); handleInputChange({ target: { name: 'consent', checked } } as any); }} />
+                    <Checkbox checked={field.value} onCheckedChange={(checked) => { field.onChange(checked); updateGlobalState('consent', checked); }} />
                   </FormControl>
                   <div className="space-y-1 leading-none">
                     <FormLabel>
-                        Piekrītu, ka mani dati tiek apstrādāti saskaņā ar privātuma politiku.
+                        Piekrītu aptaujas inforāciju nodod speciālistam piedāvājuma izveidei.
                     </FormLabel>
+                    <FormMessage />
                   </div>
                 </FormItem>
               )}

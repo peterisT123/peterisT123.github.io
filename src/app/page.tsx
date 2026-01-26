@@ -1,7 +1,6 @@
 'use client';
 
 import { Check, Home, Landmark, Mail, ShieldCheck } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
 
 import { Stepper } from '@/components/stepper';
 import { Button } from '@/components/ui/button';
@@ -105,20 +104,10 @@ export default function InsuranceWizard() {
       </header>
 
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={step}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            {currentStepData?.component}
-          </motion.div>
-        </AnimatePresence>
+        {currentStepData?.component}
       </main>
 
-      <footer className="sticky bottom-0 bg-background/80 backdrop-blur-sm border-t py-4">
+      <footer className="sticky bottom-0 bg-background/80 border-t py-4">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           <div>
             {step > 1 && !state.submitted && (

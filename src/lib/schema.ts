@@ -8,6 +8,7 @@ export const ContactSchema = z.object({
   email: z.string(requiredError).email('Lūdzu, ievadiet korektu e-pasta adresi.'),
   phone: z.string(requiredError).min(8, 'Telefona numuram jābūt vismaz 8 ciparus garam.'),
   company: z.string().optional(),
+  consent: z.boolean().refine(value => value === true, { message: 'Jums jāpiekrīt noteikumiem.' }),
 });
 
 

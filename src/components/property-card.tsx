@@ -432,12 +432,23 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                   )}
                 />
                 {movablePropertyIncluded && (
-                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
+                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 ml-8">
+                     <FormField
+                        control={form.control}
+                        name="totalMovablePropertyValue"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Mantas kopējā vērtība</FormLabel>
+                                <FormControl><Input type="number" placeholder="10000" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || undefined)} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                        />
                     <FormField
                         control={form.control}
                         name="valuableMovablePropertyIncluded"
                         render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 ml-8 bg-accent/20">
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 bg-accent/20">
                             <div className="space-y-0.5">
                                 <FormLabel className="text-base">Vērtīgāks par 3000 EUR</FormLabel>
                             </div>
@@ -466,7 +477,7 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                         )}
                     />
                     {civilLiabilityInsuranceIncluded && (
-                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="pt-4 ml-8">
+                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 ml-8">
                             <FormField
                             control={form.control}
                             name="civilLiabilityCoverage"
@@ -497,6 +508,40 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                                 </FormItem>
                             )}
                             />
+                             <FormField
+                                control={form.control}
+                                name="civilLiabilityValue"
+                                render={({ field }) => (
+                                    <FormItem className="space-y-3">
+                                    <FormLabel>Vērtība EUR</FormLabel>
+                                    <FormControl>
+                                        <RadioGroup
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                        className="flex flex-col md:flex-row gap-4"
+                                        >
+                                        <FormItem className="flex items-center space-x-3 space-y-0">
+                                            <FormControl><RadioGroupItem value="5000" /></FormControl>
+                                            <FormLabel className="font-normal">5000</FormLabel>
+                                        </FormItem>
+                                        <FormItem className="flex items-center space-x-3 space-y-0">
+                                            <FormControl><RadioGroupItem value="10000" /></FormControl>
+                                            <FormLabel className="font-normal">10000</FormLabel>
+                                        </FormItem>
+                                        <FormItem className="flex items-center space-x-3 space-y-0">
+                                            <FormControl><RadioGroupItem value="15000" /></FormControl>
+                                            <FormLabel className="font-normal">15000</FormLabel>
+                                        </FormItem>
+                                        <FormItem className="flex items-center space-x-3 space-y-0">
+                                            <FormControl><RadioGroupItem value="20000 un vairāk" /></FormControl>
+                                            <FormLabel className="font-normal">20000 un vairāk</FormLabel>
+                                        </FormItem>
+                                        </RadioGroup>
+                                    </FormControl>
+                                    <FormMessage />
+                                    </FormItem>
+                                )}
+                                />
                         </motion.div>
                     )}
                 </div>

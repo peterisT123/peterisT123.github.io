@@ -226,6 +226,7 @@ export function BuildingForm() {
                                                             name={`buildings.${index}.civilLiabilityValue`}
                                                             label="Vērtība EUR"
                                                             items={['5000', '10000', '15000', '20000 un vairāk']}
+                                                            gridCols="grid-cols-4"
                                                         />
                                                     </div>
                                                 )}

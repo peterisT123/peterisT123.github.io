@@ -1,4 +1,3 @@
-
 import {
   Body,
   Container,
@@ -88,88 +87,94 @@ const DataRow = ({ label, value }: DataRowProps) => (
 );
 
 
-export const AdminEmail = ({ state }: AdminEmailProps) => (
-  <Html>
-    <Head />
-    <Preview>Jauns apdrošināšanas pieteikums</Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <div style={box}>
-          <Heading as="h1" style={h1}>Jauns pieteikums</Heading>
-          
-          <DataRow label="Produkts" value={state.product} />
+export const AdminEmail = ({ state }: AdminEmailProps) => {
+    return (
+        <Html>
+            <Head />
+            <Preview>Jauns apdrošināšanas pieteikums</Preview>
+            <Body style={main}>
+            <Container style={container}>
+                <div style={box}>
+                <Heading as="h1" style={h1}>Pieteikuma kopsavilkums</Heading>
+                
+                <DataRow label="Produkts" value={state.product} />
 
-          <Hr style={hr} />
+                <Hr style={hr} />
 
-          <Heading as="h2" style={h2}>Kontaktinformācija</Heading>
-          <DataRow label="Vārds" value={state.contact.name} />
-          <DataRow label="E-pasts" value={state.contact.email} />
-          <DataRow label="Tālrunis" value={state.contact.phone} />
-          {state.contact.company && <DataRow label="Uzņēmums" value={state.contact.company} />}
+                <Heading as="h2" style={h2}>Kontaktinformācija</Heading>
+                <DataRow label="Vārds" value={state.contact.name} />
+                <DataRow label="E-pasts" value={state.contact.email} />
+                <DataRow label="Tālrunis" value={state.contact.phone} />
+                {state.contact.company && <DataRow label="Uzņēmums" value={state.contact.company} />}
+    <DataRow label="Piekrišana" value={state.contact.consent ? 'Jā' : 'Nē'} />
 
-          {state.product === 'Ceļojums' && (
-            <>
-              <Hr style={hr} />
-              <Heading as="h2" style={h2}>Ceļojuma detaļas</Heading>
-              <DataRow label="Galamērķis" value={state.travel.destination} />
-              <DataRow label="Datums no" value={state.travel.dateFrom?.toLocaleDateString('lv-LV')} />
-              <DataRow label="Datums līdz" value={state.travel.dateTo?.toLocaleDateString('lv-LV')} />
-              <DataRow label="Ceļotāji (līdz 64 g.v.)" value={state.travel.travelers.upTo64} />
-              <DataRow label="Ceļotāji (65-74 g.v.)" value={state.travel.travelers.from65to74} />
-              <DataRow label="Ceļotāji (no 75 g.v.)" value={state.travel.travelers.from75} />
-              <DataRow label="Civiltiesiskā apdrošināšana" value={state.travel.civilLiability} />
-              <DataRow label="Nodarbe" value={state.travel.occupation} />
-              <DataRow label="Sports un aktīvā atpūta" value={state.travel.sports} />
-            </>
-          )}
+                {state.product === 'Ceļojums' && (
+                    <>
+                    <Hr style={hr} />
+                    <Heading as="h2" style={h2}>Ceļojuma detaļas</Heading>
+                    <DataRow label="Datums no" value={state.travel.travelDateFrom ? new Date(state.travel.travelDateFrom).toLocaleDateString('lv-LV') : undefined} />
+                    <DataRow label="Datums līdz" value={state.travel.travelDateTo ? new Date(state.travel.travelDateTo).toLocaleDateString('lv-LV') : undefined} />
+                    <DataRow label="Vārds" value={state.travel.firstName} />
+                    <DataRow label="Uzvārds" value={state.travel.lastName} />
+                    <DataRow label="Dzimšanas datums" value={state.travel.birthDate ? new Date(state.travel.birthDate).toLocaleDateString('lv-LV') : undefined} />
+                    <DataRow label="Ziemas sports" value={state.travel.winterSports} />
+                    <DataRow label="Daivings" value={state.travel.diving} />
+                    <DataRow label="Citas sporta aktivitātes" value={state.travel.otherSports} />
+                    <DataRow label="Sacensības / treniņi" value={state.travel.competitions} />
+                    <DataRow label="Ekstrēmā sporta sacensības / treniņi" value={state.travel.extremeSports} />
+                    <DataRow label="Fizisks darbs" value={state.travel.physicalWork} />
+                    <DataRow label="Īpašuma apdrošināšana Latvijā" value={state.travel.propertyInsurance} />
+                    </>
+                )}
 
-          {state.product === 'Īpašums' && state.buildings.map((building, index) => (
-            <React.Fragment key={building.id}>
-              <Hr style={hr} />
-              <Heading as="h2" style={h2}>{`Īpašums ${index + 1}: ${building.objectType}`}</Heading>
-              <DataRow label="Īpašnieka vārds, uzvārds" value={building.ownerName} />
-              <DataRow label="Platība (m²)" value={building.propertyArea} />
-              <DataRow label="Nodošanas ekspluatācijā gads" value={building.commissioningYear} />
-              <DataRow label="Būvkonstrukcijas materiāls" value={building.constructionMaterial} />
-              <DataRow label="Iekšējās apdares līmenis" value={building.finishingLevel} />
-              <DataRow label="Pēdējās renovācijas gads" value={building.lastRenovationYear} />
-              <DataRow label="Stāvu skaits" value={building.totalFloors} />
-              <DataRow label="Stāvs (dzīvoklim)" value={building.currentFloor} />
-              <DataRow label="Pastāvīgi apdzīvots" value={building.isConstantlyInhabited ? 'Jā' : 'Nē'} />
-              <DataRow label="Tiek izīrēts" value={building.isRented ? 'Jā' : 'Nē'} />
-              <DataRow label="Saimnieciskā darbība" value={building.isCommercial ? 'Jā' : 'Nē'} />
-              {building.isCommercial && <DataRow label="Saimn. darbības veids" value={building.commercialActivityType} />}
-              <DataRow label="Signalizācija" value={building.hasSecurityAlarm ? 'Jā' : 'Nē'} />
-              <DataRow label="Zaudējumi pēdējos 3 gados" value={building.lossesInLast3Years ? 'Jā' : 'Nē'} />
-              <DataRow label="Iedzīves apdrošināšana" value={building.movablePropertyIncluded ? 'Jā' : 'Nē'} />
-              {building.movablePropertyIncluded && <DataRow label="Iedzīves summa" value={`${building.totalMovablePropertyValue} EUR`} />}
-              <DataRow label="Īpaši vērtīga iedzīve" value={building.valuableMovablePropertyIncluded ? 'Jā' : 'Nē'} />
-              {building.valuableMovablePropertyIncluded && <DataRow label="Vērtīgās iedzīves summa" value={`${building.movablePropertyValue} EUR`} />}
-              <DataRow label="Saules paneļi" value={building.hasSolarPanels ? 'Jā' : 'Nē'} />
-              {building.hasSolarPanels && (
-                  <>
-                    <DataRow label="Paneļu skaits" value={building.solarPanelsCount} />
-                    <DataRow label="Paneļu vērtība" value={`${building.solarPanelsValue} EUR`} />
-                    <DataRow label="Paneļu atrašanās vieta" value={building.solarPanelsLocation} />
-                  </>
-              )}
-               <DataRow label="Civiltiesiskā apdrošināšana" value={building.civilLiabilityInsuranceIncluded ? 'Jā' : 'Nē'} />
-               {building.civilLiabilityInsuranceIncluded && (
-                  <>
-                    <DataRow label="CTA segums" value={building.civilLiabilityCoverage} />
-                    <DataRow label="CTA summa" value={`${building.civilLiabilityValue} EUR`} />
-                  </>
-              )}
-            </React.Fragment>
-          ))}
-          
-           <Hr style={hr} />
+                {state.product === 'Īpašums' && state.buildings.map((building, index) => (
+                    <React.Fragment key={building.id}>
+                    <Hr style={hr} />
+                    <Heading as="h2" style={h2}>{`Īpašums ${index + 1}: ${building.objectType}`}</Heading>
+                    <DataRow label="Īpašnieka vārds, uzvārds" value={building.ownerName} />
+                    <DataRow label="Platība (m²)" value={building.propertyArea} />
+                    <DataRow label="Nodošanas ekspluatācijā gads" value={building.commissioningYear} />
+                    <DataRow label="Būvkonstrukcijas materiāls" value={building.constructionMaterial} />
+                    <DataRow label="Iekšējās apdares līmenis" value={building.finishingLevel} />
+                    <DataRow label="Pēdējās renovācijas gads" value={building.lastRenovationYear} />
+                    <DataRow label="Stāvu skaits" value={building.totalFloors} />
+                    <DataRow label="Stāvs (dzīvoklim)" value={building.currentFloor} />
+                    <DataRow label="Pastāvīgi apdzīvots" value={building.isConstantlyInhabited ? 'Jā' : 'Nē'} />
+                    <DataRow label="Tiek izīrēts" value={building.isRented ? 'Jā' : 'Nē'} />
+                    <DataRow label="Saimnieciskā darbība" value={building.isCommercial ? 'Jā' : 'Nē'} />
+                    {building.isCommercial && <DataRow label="Saimn. darbības veids" value={building.commercialActivityType} />}
+                    <DataRow label="Signalizācija" value={building.hasSecurityAlarm ? 'Jā' : 'Nē'} />
+                    <DataRow label="Zaudējumi pēdējos 3 gados" value={building.lossesInLast3Years ? 'Jā' : 'Nē'} />
+                    <DataRow label="Iedzīves apdrošināšana" value={building.movablePropertyIncluded ? 'Jā' : 'Nē'} />
+                    {building.movablePropertyIncluded && <DataRow label="Iedzīves summa" value={building.totalMovablePropertyValue ? `${building.totalMovablePropertyValue} EUR` : undefined} />}
+                    <DataRow label="Īpaši vērtīga iedzīve" value={building.valuableMovablePropertyIncluded ? 'Jā' : 'Nē'} />
+                    {building.valuableMovablePropertyIncluded && <DataRow label="Vērtīgās iedzīves summa" value={building.movablePropertyValue ? `${building.movablePropertyValue} EUR` : undefined} />}
+                    <DataRow label="Saules paneļi" value={building.hasSolarPanels ? 'Jā' : 'Nē'} />
+                    {building.hasSolarPanels && (
+                        <>
+                            <DataRow label="Paneļu skaits" value={building.solarPanelsCount} />
+                            <DataRow label="Paneļu vērtība" value={building.solarPanelsValue ? `${building.solarPanelsValue} EUR` : undefined} />
+                            <DataRow label="Paneļu atrašanās vieta" value={building.solarPanelsLocation} />
+                        </>
+                    )}
+                    <DataRow label="Civiltiesiskā apdrošināšana" value={building.civilLiabilityInsuranceIncluded ? 'Jā' : 'Nē'} />
+                    {building.civilLiabilityInsuranceIncluded && (
+                        <>
+                            <DataRow label="CTA segums" value={building.civilLiabilityCoverage} />
+                            <DataRow label="CTA summa" value={building.civilLiabilityValue ? `${building.civilLiabilityValue} EUR` : undefined} />
+                        </>
+                    )}
+                    </React.Fragment>
+                ))}
+                
+                <Hr style={hr} />
 
-            <Text style={text}>
-                Šis e-pasts tika nosūtīts no apdrošināšanas pieteikuma formas.
-            </Text>
-        </div>
-      </Container>
-    </Body>
-  </Html>
-);
+                    <Text style={text}>
+                        Šis e-pasts tika nosūtīts no apdrošināšanas pieteikuma formas.
+                    </Text>
+                </div>
+            </Container>
+            </Body>
+        </Html>
+    );
+}

@@ -23,13 +23,19 @@ interface PropertyCardProps {
 }
 
 export function PropertyCard({ building, index }: PropertyCardProps) {
-  const { updateBuilding, removeBuilding, state: { buildings, legalStatus } } = useAppContext();
+  const { updateBuilding, removeBuilding, setNextStepDisabled, state: { buildings, legalStatus } } = useAppContext();
 
   const form = useForm<BuildingType>({
     resolver: zodResolver(BuildingSchema),
     defaultValues: building,
     mode: 'onBlur',
   });
+
+  const { formState: { isValid } } = form;
+
+  useEffect(() => {
+    setNextStepDisabled(!isValid);
+  }, [isValid, setNextStepDisabled]);
 
   const objectType = form.watch('objectType');
   const movablePropertyIncluded = form.watch('movablePropertyIncluded');
@@ -78,7 +84,7 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                   name="objectType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Objekta tips</FormLabel>
+                      <FormLabel>Objekta tips <span className="text-red-500">*</span></FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger><SelectValue placeholder="Izvēlieties objekta tipu" /></SelectTrigger>
@@ -98,7 +104,7 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                   name="ownerName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Īpašnieka vārds, uzvārds</FormLabel>
+                      <FormLabel>Īpašnieka vārds, uzvārds <span className="text-red-500">*</span></FormLabel>
                       <FormControl><Input placeholder="Jānis Bērziņš" {...field} /></FormControl>
                       <p className="text-xs text-muted-foreground">Kadastra numurs un/vai personas kods tiks precizēts telefoniski</p>
                       <FormMessage />
@@ -110,7 +116,7 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                   name="constructionMaterial"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Būvniecības materiāls</FormLabel>
+                      <FormLabel>Būvniecības materiāls <span className="text-red-500">*</span></FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger><SelectValue placeholder="Izvēlieties materiālu" /></SelectTrigger>
@@ -130,7 +136,7 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                     name="lastRenovationYear"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Kapitālā remonta gads</FormLabel>
+                        <FormLabel>Kapitālā remonta gads <span className="text-red-500">*</span></FormLabel>
                         <FormControl><Input type="number" placeholder="2022" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || undefined)} /></FormControl>
                         <FormMessage />
                         </FormItem>
@@ -141,7 +147,7 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                   name="finishingLevel"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Apdares darbu līmenis</FormLabel>
+                      <FormLabel>Apdares darbu līmenis <span className="text-red-500">*</span></FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger><SelectValue placeholder="Izvēlieties apdares līmeni" /></SelectTrigger>
@@ -157,6 +163,7 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                   )}
                 />
               </div>
+              <p className="text-sm text-red-500">* ir obligāti aizpildāmie lauki</p>
 
               <Separator />
 
@@ -448,7 +455,7 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                         control={form.control}
                         name="valuableMovablePropertyIncluded"
                         render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 bg-accent/20">
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 bg-green-500/10">
                             <div className="space-y-0.5">
                                 <FormLabel className="text-base">Vērtīgāks par 3000 EUR</FormLabel>
                             </div>

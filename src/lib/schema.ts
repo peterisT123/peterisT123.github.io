@@ -16,10 +16,12 @@ export const BuildingSchema = z.object({
     id: z.string(),
     objectType: z.enum(['Ēka', 'Dzīvoklis', 'Palīgēka'], requiredError),
     ownerName: z.string(requiredError).min(2, 'Vārdam jābūt vismaz 2 burtus garam.').max(120, 'Vārds nevar būt garāks par 120 burtiem.'),
-    propertyArea: z.number({ ...requiredError, ...invalidTypeError }).positive('Platībai jābūt lielākai par 0.'),
+    propertyArea: z.number({ ...invalidTypeError }).positive('Platībai jābūt lielākai par 0.').optional(),
     commissioningYear: z.enum(['Pirms 1971', 'No 1972 - 1999', 'Pēc 2000', 'Nav nodots'], requiredError),
     constructionMaterial: z.enum(['Mūris', 'Koks', 'Jaukta tipa'], requiredError),
-    lastRenovationYear: z.number(invalidTypeError).positive('Remonta gadam jābūt pozitīvam skaitlim.').optional(),
+    lastRenovationYear: z.number({ ...requiredError, ...invalidTypeError })
+    .min(1800, 'Remonta gadam jābūt lielākam par 1800.')
+    .max(new Date().getFullYear(), `Remonta gads nevar būt lielāks par ${new Date().getFullYear()}.`),
     finishingLevel: z.enum(['Vienkāršs', 'Kvalitatīvs', 'Ekskluzīvs'], requiredError),
     isConstantlyInhabited: z.boolean(),
     isRented: z.boolean(),
@@ -61,7 +63,7 @@ export const BuildingSchema = z.object({
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: 'Lūdzu, norādiet ēkas stāvu skaitu.',
-            path: ['totalFloors'],
+            path: ['totalFlools'],
         });
     }
 

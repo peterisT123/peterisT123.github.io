@@ -9,12 +9,12 @@ import { Product } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 export const ProductSelectionStep = () => {
-  const { setProduct } = useAppContext();
+  const { setState } = useAppContext();
   const [selection, setSelection] = useState<Product | null>(null);
 
   const handleApply = () => {
     if (selection) {
-      setProduct(selection);
+      setState((prev) => ({ ...prev, product: selection }));
     }
   };
 
@@ -29,7 +29,7 @@ export const ProductSelectionStep = () => {
         </div>
       </header>
       <div className="w-full max-w-4xl px-4">
-        <Card className="w-full p-8 rounded-3xl shadow-lg border-none bg-transparent">
+        <Card className="w-full p-8 rounded-3xl shadow-lg border-none">
             <CardHeader className="text-center">
             <CardTitle className="text-3xl lg:text-4xl font-bold font-headline text-primary leading-tight">
                 Izvēlieties apdrošināšanas veidu

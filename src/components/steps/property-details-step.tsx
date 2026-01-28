@@ -18,6 +18,20 @@ export function PropertyDetailsStep() {
   const { state, addBuilding } = useAppContext();
   const [currentIndex, setCurrentIndex] = useState(0);
   const prevBuildingsLength = useRef(state.buildings.length);
+  const effectRan = useRef(false);
+
+  useEffect(() => {
+    if (effectRan.current === false) {
+      if (state.buildings.length === 0) {
+        addBuilding();
+      }
+    }
+
+    return () => {
+      effectRan.current = true;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     // When a building is added, automatically switch to it.

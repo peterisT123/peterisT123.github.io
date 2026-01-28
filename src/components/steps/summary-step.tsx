@@ -1,54 +1,11 @@
 'use client';
 import { useAppContext } from '@/context/app-context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { CheckCircle2, XCircle, MailCheck } from 'lucide-react';
-import { format } from 'date-fns';
+
+import { SummaryItem, BooleanSummaryItem } from '../summary-item';
 
 export function SummaryStep() {
   const { state } = useAppContext();
-
-  const SummaryItem = ({ label, value }: { label: string; value: string | number | undefined | Date }) => {
-    if (value === undefined || value === null || value === '') return null;
-    
-    let displayValue = value;
-    if (value instanceof Date) {
-      displayValue = format(value, 'dd.MM.yyyy');
-    }
-
-    return (
-        <div className="flex justify-between items-center py-2">
-            <p className="text-muted-foreground">{label}</p>
-            <p className="font-semibold text-foreground text-right">{displayValue}</p>
-        </div>
-    );
-  };
-
-  const BooleanSummaryItem = ({ label, value }: { label: string; value: boolean }) => (
-    <div className="flex justify-between items-center py-2">
-      <p className="text-muted-foreground">{label}</p>
-      <div className="flex items-center gap-2 font-semibold">
-        {value ? (
-          <CheckCircle2 className="h-5 w-5 text-green-500" />
-        ) : (
-          <XCircle className="h-5 w-5 text-red-500" />
-        )}
-        <span>{value ? 'Jā' : 'Nē'}</span>
-      </div>
-    </div>
-  );
-
-  if (state.submitted) {
-    return (
-        <Card className="max-w-2xl mx-auto rounded-3xl shadow-lg">
-            <CardHeader className="text-center">
-                <MailCheck className="mx-auto h-16 w-16 text-primary" />
-                <CardTitle className="text-3xl font-headline">Paldies!</CardTitle>
-                <CardDescription className='text-base'>Forma nosūtīta!!!!</CardDescription>
-            </CardHeader>
-        </Card>
-    );
-  }
 
   if (state.product === 'Ceļojums') {
     return (

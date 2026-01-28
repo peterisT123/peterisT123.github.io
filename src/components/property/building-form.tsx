@@ -193,13 +193,15 @@ export function BuildingForm() {
                                                 <FormSwitch name={`buildings.${index}.movablePropertyIncluded`} label="Iekļaut kustamo mantu" />
                                                 {movablePropertyIncluded && (
                                                     <div className="mt-4 space-y-4 pl-6 border-l">
-                                                        <FormInput
-                                                            name={`buildings.${index}.totalMovablePropertyValue`}
-                                                            label="Mantas kopējā vērtība"
-                                                            type="number"
-                                                            placeholder="10000"
-                                                        />
-                                                        <FormSwitch name={`buildings.${index}.valuableMovablePropertyIncluded`} label="Vērtīgāks par 3000 EUR" />
+                                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            <FormInput
+                                                                name={`buildings.${index}.totalMovablePropertyValue`}
+                                                                label="Mantas kopējā vērtība"
+                                                                type="number"
+                                                                placeholder="10000"
+                                                            />
+                                                            <FormSwitch name={`buildings.${index}.valuableMovablePropertyIncluded`} label="Vērtīgāks par 3000 EUR" />
+                                                        </div>
                                                         {valuableMovablePropertyIncluded && (
                                                             <FormInput
                                                                 name={`buildings.${index}.movablePropertyValue`}

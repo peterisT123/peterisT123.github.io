@@ -67,7 +67,7 @@ const travelSteps = [
 ];
 
 export default function InsuranceWizard() {
-  const { state, handleBack, handleNext, setSubmitted, handleReset } = useAppContext();
+  const { state, handleBack, handleNext, setSubmitted, handleReset, isNextStepDisabled, formId } = useAppContext();
   const { step, submitted, product } = state;
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -149,9 +149,9 @@ export default function InsuranceWizard() {
         <AnimatePresence mode="wait">
           <motion.div
             key={submitted ? 'submitted' : step}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: 20, backgroundColor: 'transparent' }}
+            animate={{ opacity: 1, y: 0, backgroundColor: 'transparent' }}
+            exit={{ opacity: 0, y: -20, backgroundColor: 'transparent' }}
             transition={{ duration: 0.3 }}
           >
             {submitted ? <SubmittedStep /> : currentStepData?.component}
@@ -174,7 +174,7 @@ export default function InsuranceWizard() {
                     Solis {step} no {steps.length}
                 </span>
                 {step < steps.length && (
-                  <Button onClick={handleNext} disabled={isSubmitting}>Tālāk</Button>
+                  <Button type={formId ? 'submit' : 'button'} form={formId || undefined} onClick={!formId ? handleNext : undefined} disabled={isNextStepDisabled || isSubmitting}>Tālāk</Button>
                 )}
                 {step === steps.length && (
                   <Button onClick={handleSend} disabled={!isContactFormValid || isSubmitting}>

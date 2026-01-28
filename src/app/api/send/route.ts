@@ -46,10 +46,15 @@ export async function POST(req: NextRequest) {
     const db = admin.firestore();
     const emailHtml = await render(AdminEmail({ state }));
 
+    let subject = `Jauns pieteikums: ${state.product}`;
+    if (state.product === 'Īpašums' && state.legalStatus) {
+      subject += ` (${state.legalStatus})`;
+    }
+
     const newEmailRef = await db.collection('mail').add({
       to: ['peteris.troksa@inbox.lv', 'inta.troksa@inbox.lv'],
       message: {
-        subject: `Jauns pieteikums: ${state.product} (${state.legalStatus})`,
+        subject: subject,
         html: emailHtml,
       },
     });

@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import type { BuildingSchema, ContactSchema, TravelSchema } from "./schema";
+import type { BuildingSchema, ContactSchema, TravelSchema, TravelerSchema } from "./schema";
 
 export type ObjectType = 'Ēka' | 'Dzīvoklis' | 'Palīgēka';
 export type CommissioningYearRange = 'Pirms 1971' | 'No 1972 - 1999' | 'Pēc 2000' | 'Nav nodots';
@@ -13,12 +13,7 @@ export type Product = 'Īpašums' | 'Ceļojums';
 export type Building = z.infer<typeof BuildingSchema>;
 export type Contact = z.infer<typeof ContactSchema>;
 export type Travel = z.infer<typeof TravelSchema>;
-
-export interface Travelers {
-  upTo64: number;
-  from65to74: number;
-  from75: number;
-}
+export type Traveler = z.infer<typeof TravelerSchema>;
 
 export interface AppState {
     step: number;

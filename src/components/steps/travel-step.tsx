@@ -1,16 +1,18 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon } from 'lucide-react';
+import { lv } from 'date-fns/locale';
+import { Calendar as CalendarIcon, Trash, Edit, PlusCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { v4 as uuidv4 } from 'uuid';
 
 import { useAppContext } from '@/context/app-context';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -28,300 +30,416 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { TravelerSchema, policyTypes } from '@/lib/schema';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-const formSchema = z.object({
-  firstName: z
-    .string()
-    .min(2, { message: 'Vārdam jābūt vismaz 2 rakstzīmes garam' })
-    .max(120, { message: 'Vārds nedrīkst būt garāks par 120 rakstzīmēm' }),
-  lastName: z
-    .string()
-    .min(2, { message: 'Uzvārdam jābūt vismaz 2 rakstzīmes garam' })
-    .max(120, { message: 'Uzvārds nedrīkst būt garāks par 120 rakstzīmēm' }),
-  birthDate: z.date({ required_error: 'Dzimšanas datums ir obligāts lauks' }),
-  winterSports: z.enum(['jā', 'nē'], {
-    required_error: ' ',
-  }),
-  diving: z.enum(['jā', 'nē'], { required_error: ' ' }),
-  otherSports: z.enum(['jā', 'nē'], {
-    required_error: ' ',
-  }),
-  competitions: z.enum(['jā', 'nē'], {
-    required_error: ' ',
-  }),
-  extremeSports: z.enum(['jā', 'nē'], {
-    required_error: ' ',
-  }),
-  physicalWork: z.enum(['jā', 'nē'], {
-    required_error: ' ',
-  }),
-  propertyInsurance: z.enum(['jā', 'nē'], {
-    required_error: ' ',
-  }),
-  travelDateFrom: z.date().optional(),
-  travelDateTo: z.date().optional(),
-}).refine(data => {
-  if (data.propertyInsurance === 'nē') {
-    return !!data.travelDateFrom && !!data.travelDateTo;
-  }
-  return true;
-}, { message: 'Ceļojuma periodam jābūt norādītam, ja nav izvēlēta īpašuma apdrošināšana', path: ['travelDateFrom'] });
-
-const activityLabels = {
+const activityLabels: { [key: string]: string } = {
   winterSports: 'Ziemas sports',
   diving: 'Daivings',
   otherSports: 'Citas sporta aktivitātes',
   competitions: 'Sacensības / treniņi',
   extremeSports: 'Ekstrēmā sporta sacensības / treniņi',
   physicalWork: 'Fizisks darbs',
-  propertyInsurance: 'Īpašuma apdrošināšana Latvijā',
+};
+
+const defaultFormValues = {
+  id: '',
+  firstName: '',
+  lastName: '',
+  birthDate: undefined,
+  policyType: policyTypes[0],
+  winterSports: 'nē',
+  diving: 'nē',
+  otherSports: 'nē',
+  competitions: 'nē',
+  extremeSports: 'nē',
+  physicalWork: 'nē',
 };
 
 export const TravelStep = () => {
-  const { state, handleNext, setNextStepDisabled, setState } = useAppContext();
+  const { state, setState, addTraveler, updateTraveler, removeTraveler, setNextStepDisabled } = useAppContext();
+  const [isFromDatePickerOpen, setIsFromDatePickerOpen] = useState(false);
+  const [isToDatePickerOpen, setIsToDatePickerOpen] = useState(false);
+  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [editingTravelerIndex, setEditingTravelerIndex] = useState<number | null>(null);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof TravelerSchema>>({
+    resolver: zodResolver(TravelerSchema),
     mode: 'onChange',
-    defaultValues: {
-      firstName: state.travel.firstName || '',
-      lastName: state.travel.lastName || '',
-      birthDate: state.travel.birthDate ? new Date(state.travel.birthDate) : undefined,
-      winterSports: state.travel.winterSports || 'nē',
-      diving: state.travel.diving || 'nē',
-      otherSports: state.travel.otherSports || 'nē',
-      competitions: state.travel.competitions || 'nē',
-      extremeSports: state.travel.extremeSports || 'nē',
-      physicalWork: state.travel.physicalWork || 'nē',
-      propertyInsurance: state.travel.propertyInsurance || 'nē',
-      travelDateFrom: state.travel.travelDateFrom ? new Date(state.travel.travelDateFrom) : undefined,
-      travelDateTo: state.travel.travelDateTo ? new Date(state.travel.travelDateTo) : undefined,
-    }
+    defaultValues: defaultFormValues,
   });
 
-  const { isValid } = form.formState;
+  useEffect(() => {
+    if (state.travel.travelers.length === 0) {
+      setIsFormVisible(true);
+    }
+  }, []);
 
   useEffect(() => {
-    setNextStepDisabled(!isValid);
-  }, [isValid, setNextStepDisabled]);
+    setNextStepDisabled(state.travel.travelers.length === 0);
+  }, [state.travel.travelers.length, setNextStepDisabled]);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    setState((prev) => ({
-       ...prev,
-       travel: {
-         ...prev.travel,
-         ...values,
-       }
-      }));
-    handleNext();
+  const onTravelDateChange = (field: 'travelDateFrom' | 'travelDateTo', value: Date | undefined) => {
+    setState(prev => ({
+      ...prev,
+      travel: {
+        ...prev.travel,
+        [field]: value,
+      }
+    }));
+  };
+
+  useEffect(() => {
+    if (state.travel.travelDateFrom && state.travel.travelDateTo && state.travel.travelDateFrom > state.travel.travelDateTo) {
+      onTravelDateChange('travelDateTo', undefined);
+    }
+  }, [state.travel.travelDateFrom, state.travel.travelDateTo]);
+
+  function onSubmit(values: z.infer<typeof TravelerSchema>) {
+    if (editingTravelerIndex !== null) {
+      updateTraveler(editingTravelerIndex, values);
+    } else {
+      addTraveler({ ...values, id: uuidv4() });
+    }
+    form.reset(defaultFormValues);
+    setEditingTravelerIndex(null);
+    if (state.travel.travelers.length > 0) {
+        setIsFormVisible(false);
+    }
   }
+
+  const handleAddNew = () => {
+    form.reset(defaultFormValues);
+    setEditingTravelerIndex(null);
+    setIsFormVisible(true);
+  };
+
+  const handleEdit = (index: number) => {
+    setEditingTravelerIndex(index);
+    form.reset(state.travel.travelers[index]);
+    setIsFormVisible(true);
+  };
+
+  const handleCancel = () => {
+    form.reset(defaultFormValues);
+    setEditingTravelerIndex(null);
+    if (state.travel.travelers.length > 0) {
+        setIsFormVisible(false);
+    }
+  };
+
+  const currentYear = new Date().getFullYear();
 
   return (
     <div className="space-y-8">
-      <Card className="rounded-3xl shadow-lg overflow-hidden">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-3xl lg:text-4xl font-bold font-headline text-primary leading-tight">
-            Apdrošinātās personas
-          </CardTitle>
-          <Button variant="link">Nākamā persona</Button>
+        <Card className="rounded-3xl shadow-lg">
+            <CardHeader className="flex-row items-center space-x-4 space-y-0">
+                <CardTitle className='text-2xl font-headline'>Apdrošinātās personas:</CardTitle>
+                <div className="flex items-center gap-4">
+                <div className="bg-primary text-primary-foreground rounded-full h-8 w-8 flex items-center justify-center text-lg font-bold">{state.travel.travelers.length}</div>
+                <Button variant="outline" onClick={handleAddNew}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Pievienot jaunu
+                </Button>
+                </div>
+            </CardHeader>
+        </Card>
+
+      {isFormVisible && (
+        <Card className="rounded-3xl shadow-lg overflow-hidden">
+          <CardHeader>
+            <CardTitle className="text-3xl lg:text-4xl font-bold font-headline text-primary leading-tight">
+              {editingTravelerIndex !== null ? 'Rediģēt personu' : 'Pievienot personu'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Vārds<span className="text-red-500">*</span></FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage className="text-red-500" />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Uzvārds<span className="text-red-500">*</span></FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage className="text-red-500" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="birthDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col space-y-2 md:w-1/2">
+                      <FormLabel>Dzimšanas datums<span className="text-red-500">*</span></FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={'outline'}
+                              className={cn(
+                                'w-full justify-start text-left font-normal',
+                                !field.value && 'text-muted-foreground'
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {field.value ? (
+                                format(new Date(field.value), 'dd.MM.yyyy')
+                              ) : (
+                                <span>DD.MM.GGGG</span>
+                              )}
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={{ after: new Date() }}
+                            initialFocus
+                            locale={lv}
+                            captionLayout="dropdown-buttons"
+                            fromYear={currentYear - 100}
+                            toYear={currentYear}
+                            classNames={{
+                                caption_dropdowns: 'flex gap-4',
+                                caption_label: 'hidden',
+                            }}
+                            labels={{
+                                labelMonthDropdown: () => 'Mēnesis',
+                                labelYearDropdown: () => 'Gads',
+                            }}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage className="text-red-500" />
+                    </FormItem>
+                  )}
+                />
+                 <p className="text-sm text-red-500">* ir obligāti aizpildāmie lauki</p>
+
+                <FormField
+                  control={form.control}
+                  name="policyType"
+                  render={({ field }) => (
+                    <FormItem className="md:w-1/2">
+                        <FormLabel className="text-lg font-semibold">
+                            Pamata riski jeb ceļojuma adprošināšnas polises tips:
+                            <span className="text-red-500">*</span>
+                        </FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Izvēlieties polises tipu" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {policyTypes.map(type => (
+                            <SelectItem key={type} value={type}>{type}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage className="text-red-500" />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="space-y-4">
+                  <Label className="text-lg font-semibold">
+                    Paaugstināta riska aktivitātes
+                  </Label>
+                  <div className="rounded-md border">
+                    {Object.keys(activityLabels).map((key, index) => (
+                      <div key={key}>
+                        {index > 0 && <hr />}
+                        <FormField
+                          control={form.control}
+                          name={key as keyof z.infer<typeof TravelerSchema>}
+                          render={({ field }) => (
+                            <FormItem className="flex items-center justify-between p-4">
+                              <FormLabel className="font-normal">
+                                {activityLabels[key]}
+                              </FormLabel>
+                              <FormControl>
+                                <RadioGroup
+                                  onValueChange={field.onChange}
+                                  value={field.value}
+                                  className="flex space-x-4"
+                                >
+                                  <FormItem className="flex items-center space-x-2 space-y-0">
+                                    <FormControl>
+                                      <RadioGroupItem value="jā" />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">Jā</FormLabel>
+                                  </FormItem>
+                                  <FormItem className="flex items-center space-x-2 space-y-0">
+                                    <FormControl>
+                                      <RadioGroupItem value="nē" />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">Nē</FormLabel>
+                                  </FormItem>
+                                </RadioGroup>
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                    <Button type="submit" className="w-full">
+                        {editingTravelerIndex !== null ? 'Saglabāt izmaiņas' : 'Pievienot'}
+                    </Button>
+                    <Button type="button" variant="outline" onClick={handleCancel} className="w-full">
+                        Atcelt
+                    </Button>
+                </div>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      )}
+
+      {state.travel.travelers.length > 0 && (
+          <Card className="rounded-3xl shadow-lg">
+              <CardHeader>
+                  <CardTitle className='text-2xl font-headline'>Apdrošinātās personas</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 px-6 pb-6">
+                  {state.travel.travelers.map((traveler, index) => (
+                      <div key={traveler.id} className="flex items-center justify-between p-4 border rounded-xl">
+                      <div className="font-medium">{traveler.firstName} {traveler.lastName}</div>
+                      <div className="flex items-center gap-2">
+                          <Button variant="ghost" size="icon" onClick={() => handleEdit(index)}>
+                          <Edit className="h-5 w-5" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => removeTraveler(index)}>
+                          <Trash className="h-5 w-5 text-red-500" />
+                          </Button>
+                      </div>
+                      </div>
+                  ))}
+              </CardContent>
+          </Card>
+      )}
+
+      <Card className="rounded-3xl shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-2xl font-headline">Ceļojuma datumi</CardTitle>
+          <CardDescription>Lūdzu, norādiet plānotos ceļojuma datumus.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form id="travel-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Vārds</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage className="text-red-500" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Uzvārds</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage className="text-red-500" />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="birthDate"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col space-y-2 md:w-1/2">
-                    <FormLabel>Dzimšanas datums</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={'outline'}
-                            className={cn(
-                              'w-full justify-start text-left font-normal',
-                              !field.value && 'text-muted-foreground'
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {field.value ? (
-                              format(field.value, 'dd.MM.yyyy')
-                            ) : (
-                              <span>DD.MM.GGGG</span>
-                            )}
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage className="text-red-500" />
-                  </FormItem>
-                )}
-              />
-
-              <div className="space-y-4">
-                <Label className="text-lg font-semibold">
-                  Paaugstināta riska aktivitātes
-                </Label>
-                <div className="rounded-md border">
-                  {Object.keys(activityLabels).map((key, index) => (
-                    <div key={key}>
-                      {index > 0 && <hr />}
-                      <FormField
-                        control={form.control}
-                        name={key as keyof typeof activityLabels}
-                        render={({ field }) => (
-                          <FormItem className="flex items-center justify-between p-4">
-                            <FormLabel className="font-normal">
-                              {activityLabels[key as keyof typeof activityLabels]}
-                            </FormLabel>
-                            <FormControl>
-                              <RadioGroup
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
-                                className="flex space-x-4"
-                              >
-                                <FormItem className="flex items-center space-x-2 space-y-0">
-                                  <FormControl>
-                                    <RadioGroupItem value="jā" />
-                                  </FormControl>
-                                  <FormLabel className="font-normal">Jā</FormLabel>
-                                </FormItem>
-                                <FormItem className="flex items-center space-x-2 space-y-0">
-                                  <FormControl>
-                                    <RadioGroupItem value="nē" />
-                                  </FormControl>
-                                  <FormLabel className="font-normal">Nē</FormLabel>
-                                </FormItem>
-                              </RadioGroup>
-                            </FormControl>
-                            <FormMessage className="text-red-500" />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Ceļošanas laiks</Label>
-                <div className="flex items-start gap-4">
-                  <FormField
-                    control={form.control}
-                    name="travelDateFrom"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col w-1/2">
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant={'outline'}
-                                className={cn(
-                                  'justify-start text-left font-normal',
-                                  !field.value && 'text-muted-foreground'
-                                )}
-                              >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {field.value ? (
-                                  format(field.value, 'dd.MM.yyyy')
-                                ) : (
-                                  <span>No</span>
-                                )}
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage className="text-red-500" />
-                      </FormItem>
-                    )}
+          <div className="flex items-start gap-4">
+            <div className="flex flex-col w-full space-y-2">
+              <Popover open={isFromDatePickerOpen} onOpenChange={setIsFromDatePickerOpen}>
+                <PopoverTrigger asChild>
+                    <Button
+                      variant={'outline'}
+                      className={cn(
+                        'justify-start text-left font-normal',
+                        !state.travel.travelDateFrom && 'text-muted-foreground'
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {state.travel.travelDateFrom ? (
+                        format(state.travel.travelDateFrom, 'dd.MM.yyyy')
+                      ) : (
+                        <span>Sākuma datums</span>
+                      )}
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={state.travel.travelDateFrom}
+                    onSelect={(date) => {
+                      onTravelDateChange('travelDateFrom', date);
+                      setIsFromDatePickerOpen(false);
+                    }}
+                    disabled={{ before: new Date(), after: state.travel.travelDateTo }}
+                    initialFocus
+                    locale={lv}
+                    captionLayout="dropdown-buttons"
+                    fromYear={new Date().getFullYear()}
+                    toYear={new Date().getFullYear() + 2}
+                    classNames={{
+                        caption_dropdowns: 'flex gap-4',
+                        caption_label: 'hidden',
+                    }}
+                    labels={{
+                        labelMonthDropdown: () => 'Mēnesis',
+                        labelYearDropdown: () => 'Gads',
+                    }}
                   />
-                  <FormField
-                    control={form.control}
-                    name="travelDateTo"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col w-1/2">
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant={'outline'}
-                                className={cn(
-                                  'justify-start text-left font-normal',
-                                  !field.value && 'text-muted-foreground'
-                                )}
-                              >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {field.value ? (
-                                  format(field.value, 'dd.MM.yyyy')
-                                ) : (
-                                  <span>Līdz</span>
-                                )}
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage className="text-red-500" />
-                      </FormItem>
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="flex flex-col w-full space-y-2">
+              <Popover open={isToDatePickerOpen} onOpenChange={setIsToDatePickerOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={'outline'}
+                    className={cn(
+                      'justify-start text-left font-normal',
+                      !state.travel.travelDateTo && 'text-muted-foreground'
                     )}
+                    disabled={!state.travel.travelDateFrom}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {state.travel.travelDateTo ? (
+                      format(state.travel.travelDateTo, 'dd.MM.yyyy')
+                    ) : (
+                      <span>Beigu datums</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={state.travel.travelDateTo}
+                    onSelect={(date) => {
+                      onTravelDateChange('travelDateTo', date);
+                      setIsToDatePickerOpen(false);
+                    }}
+                    disabled={{ before: state.travel.travelDateFrom || new Date() }}
+                    initialFocus
+                    locale={lv}
+                    captionLayout="dropdown-buttons"
+                    fromYear={new Date().getFullYear()}
+                    toYear={new Date().getFullYear() + 2}
+                    classNames={{
+                        caption_dropdowns: 'flex gap-4',
+                        caption_label: 'hidden',
+                    }}
+                    labels={{
+                        labelMonthDropdown: () => 'Mēnesis',
+                        labelYearDropdown: () => 'Gads',
+                    }}
                   />
-                </div>
-              </div>
-            </form>
-          </Form>
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

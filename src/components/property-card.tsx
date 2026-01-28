@@ -27,7 +27,11 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
 
   const form = useForm<BuildingType>({
     resolver: zodResolver(BuildingSchema),
-    defaultValues: building,
+    defaultValues: {
+      ...building,
+      legalStatus: legalStatus,
+      isCommercial: legalStatus === 'Juridiska persona',
+    },
     mode: 'onBlur',
   });
 
@@ -49,6 +53,13 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
     });
     return () => subscription.unsubscribe();
   }, [form.watch, index, updateBuilding]);
+
+  useEffect(() => {
+    form.setValue('legalStatus', legalStatus);
+    if (legalStatus === 'Juridiska persona') {
+      form.setValue('isCommercial', true);
+    }
+}, [legalStatus, form]);
 
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -100,17 +111,29 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                   )}
                 />
                 <FormField
-                  control={form.control}
-                  name="ownerName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Īpašnieka vārds, uzvārds <span className="text-red-500">*</span></FormLabel>
-                      <FormControl><Input placeholder="Jānis Bērziņš" {...field} /></FormControl>
-                      <p className="text-xs text-muted-foreground">Kadastra numurs un/vai personas kods tiks precizēts telefoniski</p>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    control={form.control}
+                    name="ownerName"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>
+                            {legalStatus === 'Juridiska persona' ? 'Uzņēmuma nosaukums' : 'Īpašnieka vārds, uzvārds'}
+                            <span className="text-red-500">*</span>
+                        </FormLabel>
+                        <FormControl>
+                            <Input 
+                            placeholder={legalStatus === 'Juridiska persona' ? 'SIA Piemērs' : 'Jānis Bērziņš'} 
+                            {...field} 
+                            />
+                        </FormControl>
+                        <p className="text-xs text-muted-foreground">
+                            {legalStatus === 'Juridiska persona' 
+                            ? 'Reģistrācijas numurs tiks precizēts telefoniski' 
+                            : 'Kadastra numurs un/vai personas kods tiks precizēts telefoniski'}
+                        </p>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                 />
                  <FormField
                   control={form.control}
                   name="constructionMaterial"
@@ -181,32 +204,6 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                         </FormItem>
                     )}
                     />
-                    {objectType === 'Ēka' && (
-                        <>
-                        <FormField
-                        control={form.control}
-                        name="currentFloor"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Stāvs</FormLabel>
-                            <FormControl><Input type="number" placeholder="3" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || undefined)} /></FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                        <FormField
-                        control={form.control}
-                        name="totalFloors"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Kopējais stāvu skaits ēkā</FormLabel>
-                            <FormControl><Input type="number" placeholder="5" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || undefined)}/></FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                    </>
-                    )}
                     {objectType === 'Dzīvoklis' && (
                     <>
                         <FormField
@@ -214,7 +211,7 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                         name="currentFloor"
                         render={({ field }) => (
                             <FormItem>
-                            <FormLabel>Stāvs</FormLabel>
+                            <FormLabel>Stāvs <span className="text-red-500">*</span></FormLabel>
                             <FormControl><Input type="number" placeholder="3" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || undefined)} /></FormControl>
                             <FormMessage />
                             </FormItem>
@@ -225,7 +222,7 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                         name="totalFloors"
                         render={({ field }) => (
                             <FormItem>
-                            <FormLabel>Kopējais stāvu skaits ēkā</FormLabel>
+                            <FormLabel>Kopējais stāvu skaits ēkā <span className="text-red-500">*</span></FormLabel>
                             <FormControl><Input type="number" placeholder="5" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || undefined)}/></FormControl>
                             <FormMessage />
                             </FormItem>
@@ -321,41 +318,37 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                 </div>
               </div>
 
-              {legalStatus === 'Juridiska persona' && (
-                <>
-                  <Separator />
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold font-headline text-foreground">Komercdarbība</h3>
+              <Separator />
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold font-headline text-foreground">Komercdarbība</h3>
+                <FormField
+                  control={form.control}
+                  name="isCommercial"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 bg-muted/30">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Vai notiek komercdarbība</FormLabel>
+                      </div>
+                      <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+                    </FormItem>
+                  )}
+                />
+                {isCommercial && (
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="pt-4 ml-8">
                     <FormField
                       control={form.control}
-                      name="isCommercial"
+                      name="commercialActivityType"
                       render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 bg-muted/30">
-                          <div className="space-y-0.5">
-                            <FormLabel className="text-base">Vai notiek komercdarbība</FormLabel>
-                          </div>
-                          <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+                        <FormItem>
+                          <FormLabel>Uzņēmējdarbības veids <span className="text-red-500">*</span></FormLabel>
+                          <FormControl><Input placeholder="Apraksts" {...field} maxLength={200} /></FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
-                    {isCommercial && (
-                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="pt-4 ml-8">
-                        <FormField
-                          control={form.control}
-                          name="commercialActivityType"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Uzņēmējdarbības veids</FormLabel>
-                              <FormControl><Input placeholder="Apraksts" {...field} maxLength={200} /></FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </motion.div>
-                    )}
-                  </div>
-                </>
-              )}
+                  </motion.div>
+                )}
+              </div>
 
               <Separator />
 
@@ -426,11 +419,11 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
 
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold font-headline text-foreground">Kustamā manta</h3>
-                 <FormField
+                <FormField
                   control={form.control}
                   name="movablePropertyIncluded"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 bg-accent/10">
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 bg-green-500/10">
                       <div className="space-y-0.5">
                         <FormLabel className="text-base">Iekļaut kustamo mantu</FormLabel>
                       </div>
@@ -439,31 +432,38 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                   )}
                 />
                 {movablePropertyIncluded && (
-                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 ml-8">
-                     <FormField
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }} 
+                    animate={{ opacity: 1, height: 'auto' }} 
+                    exit={{ opacity: 0, height: 0 }} 
+                    className="pt-4 ml-8 space-y-4"
+                  >
+                    <div className="rounded-lg border p-4 bg-green-500/10 grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FormField
                         control={form.control}
                         name="totalMovablePropertyValue"
                         render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Mantas kopējā vērtība</FormLabel>
-                                <FormControl><Input type="number" placeholder="10000" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || undefined)} /></FormControl>
-                                <FormMessage />
-                            </FormItem>
+                          <FormItem>
+                            <FormLabel>Mantas kopējā vērtība <span className="text-red-500">*</span></FormLabel>
+                            <FormControl><Input type="number" placeholder="10000" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || undefined)} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
                         )}
-                        />
-                    <FormField
+                      />
+                      <FormField
                         control={form.control}
                         name="valuableMovablePropertyIncluded"
                         render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 bg-green-500/10">
-                            <div className="space-y-0.5">
-                                <FormLabel className="text-base">Vērtīgāks par 3000 EUR</FormLabel>
+                          <FormItem>
+                            <FormLabel>Vērtīgāks par 3000 EUR</FormLabel>
+                            <div className="h-10 flex items-center">
+                                <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
                             </div>
-                            <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-                            </FormItem>
+                          </FormItem>
                         )}
-                        />
-                   </motion.div>
+                      />
+                    </div>
+                  </motion.div>
                 )}
               </div>
 
@@ -490,7 +490,7 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                             name="civilLiabilityCoverage"
                             render={({ field }) => (
                                 <FormItem className="space-y-3">
-                                <FormLabel>Apdrošināšanas segums</FormLabel>
+                                <FormLabel>Apdrošināšanas segums <span className="text-red-500">*</span></FormLabel>
                                 <FormControl>
                                     <RadioGroup
                                     onValueChange={field.onChange}
@@ -520,7 +520,7 @@ export function PropertyCard({ building, index }: PropertyCardProps) {
                                 name="civilLiabilityValue"
                                 render={({ field }) => (
                                     <FormItem className="space-y-3">
-                                    <FormLabel>Vērtība EUR</FormLabel>
+                                    <FormLabel>Vērtība EUR <span className="text-red-500">*</span></FormLabel>
                                     <FormControl>
                                         <RadioGroup
                                         onValueChange={field.onChange}

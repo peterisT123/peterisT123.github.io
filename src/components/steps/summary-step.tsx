@@ -1,144 +1,102 @@
 'use client';
+
 import { useAppContext } from '@/context/app-context';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
-import { SummaryItem, BooleanSummaryItem } from '../summary-item';
+const DataRow = ({ label, value }: { label: string; value?: string | number | null }) => (
+    <div className="flex justify-between py-3 px-4">
+        <p className="text-muted-foreground">{label}</p>
+        <p className="font-medium text-right">{value || '-'}</p>
+    </div>
+);
 
-export function SummaryStep() {
+const SummarySection = ({ title, children }: { title: string, children: React.ReactNode }) => (
+    <div>
+        <h3 className="text-lg font-semibold mb-2">{title}</h3>
+        <div className="border rounded-lg overflow-hidden">
+            <div className="divide-y">
+                {children}
+            </div>
+        </div>
+    </div>
+);
+
+export const SummaryStep = () => {
   const { state } = useAppContext();
+  const { product, travel, buildings, contact } = state;
 
-  if (state.product === 'Ceļojums') {
-    return (
-      <Card className="max-w-3xl mx-auto rounded-3xl shadow-lg">
-        <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-headline">Pieteikuma kopsavilkums</CardTitle>
-          <CardDescription>Solis 2 no 3. Lūdzu, pārbaudiet ievadīto informāciju pirms nosūtīšanas.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-8">
-          <div>
-            <h3 className="text-lg font-semibold font-headline mb-2 text-primary">Ceļojuma informācija</h3>
-            <Card className='rounded-2xl'>
-              <CardContent className='p-4 divide-y'>
-                <SummaryItem label="Ceļojuma sākuma datums" value={state.travel.travelTime.from} />
-                <SummaryItem label="Ceļojuma beigu datums" value={state.travel.travelTime.to} />
-                <BooleanSummaryItem label="Vairākkārtēji braucieni gada laikā" value={state.travel.multipleTrips} />
-                <SummaryItem label="Ceļotāju skaits (līdz 64 gadiem)" value={state.travel.travelers.upTo64} />
-                <SummaryItem label="Ceļotāju skaits (65-74 gadi)" value={state.travel.travelers.from65to74} />
-                <SummaryItem label="Ceļotāju skaits (75+ gadi)" value={state.travel.travelers.from75} />
-                <SummaryItem label="Aktivitātes" value={state.travel.activities} />
-              </CardContent>
-            </Card>
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold font-headline mb-2 text-primary">Kontaktinformācija</h3>
-            <Card className='rounded-2xl'>
-              <CardContent className='p-4 divide-y'>
-                <SummaryItem label="Vārds, uzvārds" value={state.contact.name} />
-                <SummaryItem label="E-pasts" value={state.contact.email} />
-                <SummaryItem label="Tālrunis" value={state.contact.phone} />
-              </CardContent>
-            </Card>
-          </div>
-        </CardContent>
-      </Card>
-    )
+  const isTravel = product === 'Ceļojums';
+  
+  const capitalizeJaNe = (value: string | undefined) => {
+    if (value === 'jā') return 'Jā';
+    if (value === 'nē') return 'Nē';
+    return value || '-';
   }
 
   return (
-    <Card className="max-w-3xl mx-auto rounded-3xl shadow-lg">
-      <CardHeader className="text-center">
-        <CardTitle className="text-3xl font-headline">Pieteikuma kopsavilkums</CardTitle>
-        <CardDescription>Solis 3 no 4. Lūdzu, pārbaudiet ievadīto informāciju pirms nosūtīšanas.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-8">
-        <div>
-          <h3 className="text-lg font-semibold font-headline mb-2 text-primary">Klienta informācija</h3>
-          <Card className='rounded-2xl'>
-            <CardContent className='p-4 divide-y'>
-              <SummaryItem label="Personas statuss" value={state.legalStatus} />
-              <SummaryItem label="Vārds, uzvārds" value={state.contact.name} />
-              <SummaryItem label="E-pasts" value={state.contact.email} />
-              <SummaryItem label="Tālrunis" value={state.contact.phone} />
-            </CardContent>
-          </Card>
-        </div>
+    <div className="space-y-8">
+      <Card className="rounded-3xl shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-3xl lg:text-4xl font-bold font-headline text-primary leading-tight">Pieteikuma kopsavilkums</CardTitle>
+          <CardDescription>Lūdzu, pārbaudiet ievadīto informāciju.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6 text-sm">
+            <div className="border rounded-lg overflow-hidden">
+                <div className="divide-y">
+                    <DataRow label="Produkts" value={product} />
+                </div>
+            </div>
 
-        <div>
-          <h3 className="text-lg font-semibold font-headline mb-2 text-primary">Apdrošināmie objekti</h3>
-          <div className="space-y-6">
-            {state.buildings.map((building, index) => (
-              <Card key={building.id} className="rounded-2xl overflow-hidden">
-                <CardHeader className='bg-muted/50 p-4'>
-                    <CardTitle className='text-xl font-headline'>Nr.{index + 1} - {building.objectType}</CardTitle>
-                </CardHeader>
-                <CardContent className="p-4 divide-y">
-                  <SummaryItem label="Īpašnieks" value={building.ownerName} />
-                  <SummaryItem label="Platība" value={`${building.propertyArea} m²`} />
-                  <SummaryItem label="Ekspluatācijā nodošanas gads" value={building.commissioningYear} />
-                  <SummaryItem label="Būvniecības materiāls" value={building.constructionMaterial} />
-                  <SummaryItem label="Kapitālā remonta gads" value={building.lastRenovationYear} />
-                  <SummaryItem label="Apdares darbu līmenis" value={building.finishingLevel} />
+            {isTravel && travel.travelers.length > 0 && (
+                <SummarySection title="Ceļojuma detaļas">
+                    <DataRow label="Datums no" value={travel.travelDateFrom ? new Date(travel.travelDateFrom).toLocaleDateString('lv-LV') : '-'} />
+                    <DataRow label="Datums līdz" value={travel.travelDateTo ? new Date(travel.travelDateTo).toLocaleDateString('lv-LV') : '-'} />
+                </SummarySection>
+            )}
 
-                  {building.objectType === 'Dzīvoklis' && (
-                    <>
-                      <SummaryItem label="Stāvs" value={building.currentFloor} />
-                      <SummaryItem label="Kopējais stāvu skaits" value={building.totalFloors} />
-                    </>
-                  )}
-                   {building.objectType === 'Ēka' && (
-                    <SummaryItem label="Stāvu skaits" value={building.totalFloors} />
-                  )}
-
-                  <BooleanSummaryItem label="Pastāvīgi apdzīvots" value={building.isConstantlyInhabited} />
-                  <BooleanSummaryItem label="Tiek izīrēts" value={building.isRented} />
-                  <BooleanSummaryItem label="Ir signalizācija" value={building.hasSecurityAlarm} />
-                  <BooleanSummaryItem label="Zaudējumi pēdējos 3 gados" value={building.lossesInLast3Years} />
-
-                  {state.legalStatus === 'Juridiska persona' && (
-                    <>
-                        <BooleanSummaryItem label="Notiek komercdarbība" value={building.isCommercial} />
-                        {building.isCommercial && (
-                            <div className='pl-4'>
-                                <SummaryItem label="Uzņēmējdarbības veids" value={building.commercialActivityType} />
-                            </div>
-                        )}
-                    </>
-                  )}
-                  
-                  <div className="py-2" />
-                  
-                  <BooleanSummaryItem label="Iekļaut kustamo mantu" value={building.movablePropertyIncluded} />
-                  {building.movablePropertyIncluded && (
-                    <div className='pl-4'>
-                        <BooleanSummaryItem label="Vērtīga kustamā manta (>3000 EUR)" value={building.valuableMovablePropertyIncluded} />
-                    </div>
-                  )}
-
-                  <div className="py-2" />
-
-                  <BooleanSummaryItem label="Ir saules paneļi" value={building.hasSolarPanels} />
-                  {building.hasSolarPanels && (
-                    <div className='pl-4 divide-y'>
-                        <SummaryItem label="Saules paneļu skaits" value={building.solarPanelsCount} />
-                        <SummaryItem label="Saules paneļu vērtība" value={building.solarPanelsValue ? `${building.solarPanelsValue} EUR` : undefined} />
-                        <SummaryItem label="Saules paneļu atrašanās vieta" value={building.solarPanelsLocation} />
-                    </div>
-                  )}
-
-                  <div className="py-2" />
-
-                  <BooleanSummaryItem label="Iekļaut civiltiesisko apdrošināšu" value={building.civilLiabilityInsuranceIncluded} />
-                  {building.civilLiabilityInsuranceIncluded && (
-                    <div className='pl-4'>
-                        <SummaryItem label="Civiltiesiskās atbildības segums" value={building.civilLiabilityCoverage} />
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+            {isTravel && travel.travelers.map((traveler, index) => (
+                <SummarySection title={`Apdrošinātā persona #${index + 1}`} key={traveler.id}>
+                    <DataRow label="Vārds" value={traveler.firstName} />
+                    <DataRow label="Uzvārds" value={traveler.lastName} />
+                    <DataRow label="Dzimšanas datums" value={traveler.birthDate ? new Date(traveler.birthDate).toLocaleDateString('lv-LV') : '-'} />
+                    <DataRow label="Polises tips" value={traveler.policyType} />
+                    <DataRow label="Ziemas sports" value={capitalizeJaNe(traveler.winterSports)} />
+                    <DataRow label="Daivings" value={capitalizeJaNe(traveler.diving)} />
+                    <DataRow label="Citas sporta aktivitātes" value={capitalizeJaNe(traveler.otherSports)} />
+                    <DataRow label="Sacensības / treniņi" value={capitalizeJaNe(traveler.competitions)} />
+                    <DataRow label="Ekstrēmā sporta sacensības / treniņi" value={capitalizeJaNe(traveler.extremeSports)} />
+                    <DataRow label="Fizisks darbs" value={capitalizeJaNe(traveler.physicalWork)} />
+                </SummarySection>
             ))}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+
+            {!isTravel && buildings.map((building, index) => (
+                <SummarySection title={`Īpašums ${index + 1}: ${building.objectType}`} key={building.id}>
+                    <DataRow label="Īpašnieka vārds, uzvārds" value={building.ownerName} />
+                    <DataRow label="Platība (m²)" value={building.propertyArea} />
+                    <DataRow label="Nodošanas ekspluatācijā gads" value={building.commissioningYear} />
+                    <DataRow label="Būvkonstrukcijas materiāls" value={building.constructionMaterial} />
+                    <DataRow label="Iekšējās apdares līmenis" value={building.finishingLevel} />
+                    <DataRow label="Pēdējās renovācijas gads" value={building.lastRenovationYear} />
+                    <DataRow label="Stāvu skaits" value={building.totalFloors} />
+                    {building.objectType === 'Dzīvoklis' && <DataRow label="Stāvs (dzīvoklim)" value={building.currentFloor} />}
+                    <DataRow label="Pastāvīgi apdzīvots" value={building.isConstantlyInhabited ? 'Jā' : 'Nē'} />
+                    <DataRow label="Tiek izīrēts" value={building.isRented ? 'Jā' : 'Nē'} />
+                    <DataRow label="Signalizācija" value={building.hasSecurityAlarm ? 'Jā' : 'Nē'} />
+                    <DataRow label="Zaudējumi pēdējos 3 gados" value={building.lossesInLast3Years ? 'Jā' : 'Nē'} />
+                    <DataRow label="Iedzīves apdrošināšana" value={building.movablePropertyIncluded ? 'Jā' : 'Nē'} />
+                    {building.movablePropertyIncluded && <DataRow label="Iedzīves summa" value={building.totalMovablePropertyValue} />}
+                    {building.movablePropertyIncluded && <DataRow label="Vērtīgas lietas" value={building.valuableMovablePropertyIncluded ? 'Jā' : 'Nē'} />}
+                    <DataRow label="Civiltiesiskā apdrošināšana" value={building.civilLiabilityInsuranceIncluded ? 'Jā' : 'Nē'} />
+                    {building.civilLiabilityInsuranceIncluded && <DataRow label="Civiltiesiskās atbildības segums" value={building.civilLiabilityCoverage} />}
+                    {building.civilLiabilityInsuranceIncluded && <DataRow label="Civiltiesiskās atbildības summa" value={building.civilLiabilityValue} />}
+                    <DataRow label="Saules paneļi" value={building.hasSolarPanels ? 'Jā' : 'Nē'} />
+                    {building.hasSolarPanels && <DataRow label="Paneļu skaits" value={building.solarPanelsCount} />}
+                    {building.hasSolarPanels && <DataRow label="Paneļu vērtība" value={building.solarPanelsValue} />}
+                    {building.hasSolarPanels && <DataRow label="Paneļu novietojums" value={building.solarPanelsLocation} />}
+                </SummarySection>
+            ))}
+        </CardContent>
+      </Card>
+    </div>
   );
-}
+};

@@ -1,22 +1,16 @@
 'use client';
 
-import { AppState, Building } from '@/lib/types';
+import { AppState, Building, Traveler } from '@/lib/types';
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 const initialState: AppState = {
   step: 1,
   product: null,
-  legalStatus: 'Fiziska persona',
   travel: {
-    travelTime: { from: undefined, to: undefined },
-    multipleTrips: false,
-    travelers: {
-      upTo64: 1,
-      from65to74: 0,
-      from75: 0,
-    },
-    activities: 'atpūta',
+    travelers: [],
+    travelDateFrom: undefined,
+    travelDateTo: undefined,
   },
   buildings: [],
   contact: {
@@ -43,6 +37,9 @@ type AppContextProps = {
   addBuilding: () => void;
   updateBuilding: (index: number, updatedBuilding: Building) => void;
   removeBuilding: (index: number) => void;
+  addTraveler: (traveler: Traveler) => void;
+  updateTraveler: (index: number, updatedTraveler: Traveler) => void;
+  removeTraveler: (index: number) => void;
 };
 
 const AppContext = createContext<AppContextProps | undefined>(undefined);
@@ -115,6 +112,34 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }));
   };
 
+  const addTraveler = (traveler: Traveler) => {
+    setState(prevState => ({
+      ...prevState,
+      travel: {
+        ...prevState.travel,
+        travelers: [...prevState.travel.travelers, traveler]
+      }
+    }));
+  }
+
+  const updateTraveler = (index: number, updatedTraveler: Traveler) => {
+    setState(prevState => {
+      const newTravelers = [...prevState.travel.travelers];
+      newTravelers[index] = updatedTraveler;
+      return { ...prevState, travel: { ...prevState.travel, travelers: newTravelers } };
+    });
+  };
+
+  const removeTraveler = (index: number) => {
+    setState(prevState => ({
+      ...prevState,
+      travel: {
+        ...prevState.travel,
+        travelers: prevState.travel.travelers.filter((_, i) => i !== index),
+      }
+    }));
+  };
+
 
   return (
     <AppContext.Provider
@@ -131,7 +156,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setFormId,
         addBuilding,
         updateBuilding,
-        removeBuilding
+        removeBuilding,
+        addTraveler,
+        updateTraveler,
+        removeTraveler
       }}
     >
       {children}

@@ -35,7 +35,7 @@ export function ContactStep() {
     <Card className="max-w-2xl mx-auto rounded-3xl shadow-lg">
       <CardHeader className="text-center">
         <CardTitle className="text-3xl font-headline">Jūsu kontaktinformācija</CardTitle>
-        <CardDescription>Solis 4 no 4. Gandrīz pabeigts!</CardDescription>
+        <CardDescription>Solis 2 no 3. Gandrīz pabeigts!</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
